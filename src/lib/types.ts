@@ -131,6 +131,32 @@ export interface WeeklyPlan {
   updated_at: string;
 }
 
+// ── Phase 4: 게시판 (0009) ──────────────────────────────────────────────────
+
+export type BoardCategory = "free" | "material" | "note";
+
+export interface BoardPost {
+  id: string;
+  category: BoardCategory;
+  author_id: string;
+  title: string;
+  content_markdown: string | null;
+  link_url: string | null;
+  week_number: number | null;
+  file_path: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BoardComment {
+  id: string;
+  post_id: string;
+  author_id: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+}
+
 // ── Phase 2: 총점/랭킹 (0006) ───────────────────────────────────────────────
 
 /** app_settings 'scoring' row의 value */

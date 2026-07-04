@@ -35,6 +35,8 @@ function baseProfile(overrides: Partial<AppUser> = {}): AppUser {
     status: "approved",
     approved_by: null,
     approved_at: null,
+    github_url: null,
+    project_url: null,
     created_at: "2026-01-01T00:00:00.000Z",
     updated_at: "2026-01-01T00:00:00.000Z",
     ...overrides,

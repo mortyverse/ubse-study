@@ -117,14 +117,14 @@
 ---
 
 ## Phase 4 — 게시판 (PRD §4.5)
-- [ ] `0006_create_board.sql`: `board_posts(category enum free|material|note, author_id, title, content_markdown, link_url, week_number, created_at, updated_at)`, `board_comments` + RLS
-- [ ] board RLS: 자유게시판 누구나(승인) 작성/댓글, 본인 글만 수정·삭제, **강의자료는 admin만 작성**, 필기노트는 본인만 수정·삭제
-- [ ] Supabase Storage 버킷(강의자료 PDF 등) 생성 + 접근 정책
-- [ ] 게시판 1메뉴 3탭 UI
-- [ ] 자유게시판: 작성/조회/댓글/삭제(본인)
-- [ ] 강의자료: admin 업로드(파일/링크), 주차별 계획 연동
-- [ ] 필기노트: 마크다운 에디터 작성 + 웹 렌더, 본인만 수정·삭제
-- [ ] 검수: `rls-security-auditor`(본인 글/강의자료 admin/Storage 정책), `ui-design-implementer`
+- [x] `0006_create_board.sql`(실제 파일명 `0009_create_board.sql`): `board_posts(category enum free|material|note, author_id, title, content_markdown, link_url, week_number, created_at, updated_at)`, `board_comments` + RLS
+- [x] board RLS: 자유게시판 누구나(승인) 작성/댓글, 본인 글만 수정·삭제, **강의자료는 admin만 작성**, 필기노트는 본인만 수정·삭제
+- [x] Supabase Storage 버킷(강의자료 PDF 등) 생성 + 접근 정책
+- [x] 게시판 1메뉴 3탭 UI
+- [x] 자유게시판: 작성/조회/댓글/삭제(본인)
+- [x] 강의자료: admin 업로드(파일/링크), 주차별 계획 연동
+- [x] 필기노트: 마크다운 에디터 작성 + 웹 렌더, 본인만 수정·삭제
+- [x] 검수: `rls-security-auditor`(본인 글/강의자료 admin/Storage 정책), `ui-design-implementer` — 클린 (버그 0건)
 
 ---
 
