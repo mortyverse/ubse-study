@@ -88,7 +88,7 @@ function BoardTabs({
             }
           />
         ) : (
-          <PostList category="material" posts={materialPosts} />
+          <PostList category="material" posts={materialPosts} isAdmin={isAdmin} />
         )}
       </TabsContent>
 

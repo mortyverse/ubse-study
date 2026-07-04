@@ -18,6 +18,8 @@ export interface BoardListPost {
   created_at: string
   users: PostAuthor | null
   comment_count: number
+  /** 필기노트 공책 사진 장수 (다른 카테고리는 항상 0) */
+  image_count: number
 }
 
 export interface BoardCommentView {

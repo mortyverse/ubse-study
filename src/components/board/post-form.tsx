@@ -3,7 +3,13 @@
 import * as React from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
-import { FileTextIcon, TrashIcon, UploadIcon } from "@radix-ui/react-icons"
+import {
+  CameraIcon,
+  FileTextIcon,
+  Pencil1Icon,
+  TrashIcon,
+  UploadIcon,
+} from "@radix-ui/react-icons"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -24,7 +30,12 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Field, FieldLabel, FieldDescription } from "@/components/ui/field"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { MarkdownEditor } from "@/components/board/markdown-editor"
+import {
+  NoteImageUploader,
+  type NoteImage,
+} from "@/components/board/note-image-uploader"
 import type { BoardCategory } from "@/lib/types"
 
 const NO_WEEK = "none"
@@ -38,6 +49,8 @@ type PostFormInitial = {
   week_number: number | null
   file_path: string | null
   file_name: string | null
+  /** 필기노트 수정 진입 시 기존 사진 (path + 서버 발급 signed URL 미리보기) */
+  images?: NoteImage[]
 }
 
 /**
@@ -71,6 +84,9 @@ function PostForm({
   )
   const [fileName, setFileName] = React.useState<string | null>(
     initial?.file_name ?? null,
+  )
+  const [noteImages, setNoteImages] = React.useState<NoteImage[]>(
+    initial?.images ?? [],
   )
   const [isUploading, setIsUploading] = React.useState(false)
   const [isPending, setIsPending] = React.useState(false)
@@ -111,6 +127,15 @@ function PostForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (isPending || isUploading) return
+    // 필기노트는 마크다운 본문 또는 필기 사진 중 하나는 있어야 한다
+    if (
+      category === "note" &&
+      content.trim() === "" &&
+      noteImages.length === 0
+    ) {
+      toast.error("마크다운 본문을 작성하거나 필기 사진을 올려 주세요.")
+      return
+    }
     setIsPending(true)
 
     try {
@@ -124,6 +149,13 @@ function PostForm({
           week_number: weekNumber,
           file_path: filePath,
           file_name: fileName,
+          ...(mode === "create" ? { category } : {}),
+        }
+      } else if (category === "note") {
+        body = {
+          title,
+          content_markdown: content,
+          image_paths: noteImages.map((img) => img.path),
           ...(mode === "create" ? { category } : {}),
         }
       } else {
@@ -258,34 +290,77 @@ function PostForm({
         </Card>
       )}
 
-      {category !== "material" && (
+      {category === "note" && (
         <Card>
           <CardHeader>
-            <CardTitle>본문</CardTitle>
+            <CardTitle>노트 내용</CardTitle>
             <CardDescription>
-              {category === "note"
-                ? "마크다운으로 작성하면 노트 상세 화면에 서식이 적용되어 표시됩니다."
-                : "마크다운 문법을 사용할 수 있습니다."}
+              마크다운으로 작성하거나, 공책에 필기했다면 사진으로 올려 보세요.
+              두 가지를 함께 써도 됩니다.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {category === "note" ? (
-              <MarkdownEditor
-                value={content}
-                onChange={setContent}
-                placeholder="마크다운으로 노트를 작성하세요."
-                maxLength={50_000}
-              />
-            ) : (
-              <Textarea
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="내용을 입력하세요. (마크다운 문법 사용 가능)"
-                className="min-h-48"
-                maxLength={50_000}
-                required
-              />
-            )}
+            <Tabs
+              defaultValue={
+                /* 사진만 있는 노트를 수정할 때는 사진 탭으로 바로 연다 */
+                (initial?.images?.length ?? 0) > 0 &&
+                (initial?.content_markdown ?? "").trim() === ""
+                  ? "photo"
+                  : "markdown"
+              }
+            >
+              <TabsList className="h-auto p-1">
+                <TabsTrigger value="markdown" className="gap-1.5 px-3 py-1.5">
+                  <Pencil1Icon className="size-4" />
+                  마크다운 작성
+                </TabsTrigger>
+                <TabsTrigger value="photo" className="gap-1.5 px-3 py-1.5">
+                  <CameraIcon className="size-4" />
+                  필기 사진
+                  {noteImages.length > 0 && (
+                    <span className="rounded-full bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary">
+                      {noteImages.length}
+                    </span>
+                  )}
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="markdown" className="mt-4">
+                <MarkdownEditor
+                  value={content}
+                  onChange={setContent}
+                  placeholder="마크다운으로 노트를 작성하세요."
+                  maxLength={50_000}
+                />
+              </TabsContent>
+
+              <TabsContent value="photo" className="mt-4">
+                <NoteImageUploader
+                  images={noteImages}
+                  onChange={setNoteImages}
+                  disabled={isPending}
+                />
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+      )}
+
+      {category === "free" && (
+        <Card>
+          <CardHeader>
+            <CardTitle>본문</CardTitle>
+            <CardDescription>마크다운 문법을 사용할 수 있습니다.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Textarea
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder="내용을 입력하세요. (마크다운 문법 사용 가능)"
+              className="min-h-48"
+              maxLength={50_000}
+              required
+            />
           </CardContent>
         </Card>
       )}

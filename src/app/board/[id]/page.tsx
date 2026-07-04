@@ -4,6 +4,7 @@ import { ExternalLinkIcon } from "@radix-ui/react-icons"
 
 import { getSessionProfile } from "@/lib/auth"
 import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 import { Container } from "@/components/layout/container"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent } from "@/components/ui/card"
@@ -55,6 +56,16 @@ export default async function BoardPostDetailPage({
 
   if (!post) notFound()
   const typedPost = post as unknown as RawPost
+
+  // 필기노트 사진: private 버킷 → 서버에서 signed URL(1시간) 발급해 렌더링
+  let noteImageUrls: string[] = []
+  if (typedPost.category === "note" && (typedPost.image_paths?.length ?? 0) > 0) {
+    const admin = createAdminClient()
+    const { data: signed } = await admin.storage
+      .from("notes")
+      .createSignedUrls(typedPost.image_paths, 60 * 60)
+    noteImageUrls = (signed ?? []).flatMap((s) => (s.signedUrl ? [s.signedUrl] : []))
+  }
 
   const { data: comments } = await supabase
     .from("board_comments")
@@ -111,6 +122,31 @@ export default async function BoardPostDetailPage({
           )}
 
           {typedPost.file_path && <AttachmentDownloadButton postId={typedPost.id} />}
+
+          {noteImageUrls.length > 0 && (
+            /* 공책 필기 사진 — 페이지 순서대로 세로 스택, 클릭하면 원본 크기로 */
+            <div className="flex flex-col gap-4">
+              {noteImageUrls.map((url, i) => (
+                <a
+                  key={url}
+                  href={url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="overflow-hidden rounded-2xl border border-border bg-card transition-colors hover:border-primary/40"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element -- 단기 signed URL이라 next/image 최적화 대상이 아니다 */}
+                  <img
+                    src={url}
+                    alt={`필기 사진 ${i + 1}/${noteImageUrls.length}`}
+                    className="w-full"
+                  />
+                </a>
+              ))}
+              <p className="text-xs text-muted-foreground">
+                필기 사진 {noteImageUrls.length}장 · 클릭하면 원본 크기로 볼 수 있습니다.
+              </p>
+            </div>
+          )}
 
           {typedPost.content_markdown && (
             <Card>

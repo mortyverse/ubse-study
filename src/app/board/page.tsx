@@ -17,6 +17,7 @@ type RawPost = {
   week_number: number | null
   link_url: string | null
   file_path: string | null
+  image_paths: string[] | null
   created_at: string
   users: { display_name: string; avatar_url: string | null } | null
   board_comments: { count: number }[] | null
@@ -33,6 +34,7 @@ function toListPost(row: RawPost): BoardListPost {
     created_at: row.created_at,
     users: row.users,
     comment_count: row.board_comments?.[0]?.count ?? 0,
+    image_count: row.image_paths?.length ?? 0,
   }
 }
 

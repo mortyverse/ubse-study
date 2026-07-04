@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation"
 
 import { getSessionProfile } from "@/lib/auth"
 import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 import { Container } from "@/components/layout/container"
 import { PageHeader } from "@/components/common/page-header"
 import { PostForm } from "@/components/board/post-form"
@@ -41,6 +42,20 @@ export default async function EditBoardPostPage({
   const typedPost = post as BoardPost
   if (!canModify(typedPost, profile)) redirect("/board")
 
+  // 필기노트 사진: private 버킷이라 폼 미리보기용 signed URL을 서버에서 발급
+  let noteImages: { path: string; url: string }[] = []
+  if (typedPost.category === "note" && (typedPost.image_paths?.length ?? 0) > 0) {
+    const admin = createAdminClient()
+    const { data: signed } = await admin.storage
+      .from("notes")
+      .createSignedUrls(typedPost.image_paths, 60 * 60)
+    noteImages = (signed ?? []).flatMap((s, i) =>
+      s.signedUrl
+        ? [{ path: typedPost.image_paths[i], url: s.signedUrl }]
+        : [],
+    )
+  }
+
   let weeklyPlans: { week_number: number; title: string }[] = []
   if (typedPost.category === "material") {
     const { data } = await supabase
@@ -69,6 +84,7 @@ export default async function EditBoardPostPage({
             week_number: typedPost.week_number,
             file_path: typedPost.file_path,
             file_name: typedPost.file_name ?? fileNameFromPath(typedPost.file_path),
+            images: noteImages,
           }}
         />
       </Container>

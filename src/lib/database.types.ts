@@ -178,6 +178,7 @@ export type Database = {
           file_name: string | null
           file_path: string | null
           id: string
+          image_paths: string[]
           link_url: string | null
           title: string
           updated_at: string
@@ -191,6 +192,7 @@ export type Database = {
           file_name?: string | null
           file_path?: string | null
           id?: string
+          image_paths?: string[]
           link_url?: string | null
           title: string
           updated_at?: string
@@ -204,6 +206,7 @@ export type Database = {
           file_name?: string | null
           file_path?: string | null
           id?: string
+          image_paths?: string[]
           link_url?: string | null
           title?: string
           updated_at?: string

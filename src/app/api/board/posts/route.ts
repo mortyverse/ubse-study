@@ -28,6 +28,7 @@ export async function POST(request: Request) {
     week_number?: unknown;
     file_path?: unknown;
     file_name?: unknown;
+    image_paths?: unknown;
   } | null;
 
   const category = body?.category as BoardCategory | undefined;
@@ -52,8 +53,34 @@ export async function POST(request: Request) {
   if (content !== null && content.length > MAX_CONTENT) {
     return invalid(`본문은 ${MAX_CONTENT}자 이내여야 합니다.`);
   }
-  if (category === "note" && (!content || content.trim() === "")) {
-    return invalid("필기노트는 본문(마크다운)이 필요합니다.");
+
+  // 필기노트 이미지 (공책 사진) — 노트 전용, 최대 10장.
+  // 경로 접두사(`${본인 id}/`)로 소유권을 검증해 타인의 오브젝트 연결을 막는다.
+  let imagePaths: string[] = [];
+  if (body?.image_paths !== undefined && body.image_paths !== null) {
+    if (
+      category !== "note" ||
+      !Array.isArray(body.image_paths) ||
+      body.image_paths.length > 10 ||
+      body.image_paths.some(
+        (p) =>
+          typeof p !== "string" ||
+          p.length > 300 ||
+          p.includes("..") ||
+          !p.startsWith(`${profile.id}/`),
+      )
+    ) {
+      return invalid("image_paths는 필기노트에서 본인이 업로드한 이미지(최대 10장)만 연결할 수 있습니다.");
+    }
+    imagePaths = body.image_paths as string[];
+  }
+
+  if (
+    category === "note" &&
+    (!content || content.trim() === "") &&
+    imagePaths.length === 0
+  ) {
+    return invalid("필기노트는 본문(마크다운) 또는 필기 사진이 필요합니다.");
   }
 
   let linkUrl: string | null = null;
@@ -118,6 +145,7 @@ export async function POST(request: Request) {
       week_number: weekNumber,
       file_path: filePath,
       file_name: fileName,
+      image_paths: imagePaths,
     })
     .select("*")
     .single();

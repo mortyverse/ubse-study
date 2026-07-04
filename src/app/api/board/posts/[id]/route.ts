@@ -47,6 +47,7 @@ export async function PATCH(
     week_number?: unknown;
     file_path?: unknown;
     file_name?: unknown;
+    image_paths?: unknown;
   } | null;
 
   const updates: Record<string, unknown> = {};
@@ -135,8 +136,50 @@ export async function PATCH(
     }
   }
 
+  // 필기노트 이미지 (공책 사진) — 노트 전용, 최대 10장.
+  // 소유권은 경로 접두사(`${작성자 id}/`)로 검증한다. canModify를 통과한
+  // 시점에서 노트는 profile.id === post.author_id 이므로 profile.id를 쓴다.
+  if (body?.image_paths !== undefined && body.image_paths !== null) {
+    if (
+      post.category !== "note" ||
+      !Array.isArray(body.image_paths) ||
+      body.image_paths.length > 10 ||
+      body.image_paths.some(
+        (p) =>
+          typeof p !== "string" ||
+          p.length > 300 ||
+          p.includes("..") ||
+          !p.startsWith(`${profile.id}/`),
+      )
+    ) {
+      return NextResponse.json(
+        { error: "image_paths는 필기노트에서 본인이 업로드한 이미지(최대 10장)만 연결할 수 있습니다." },
+        { status: 400 },
+      );
+    }
+    updates.image_paths = body.image_paths as string[];
+  }
+
   if (Object.keys(updates).length === 0) {
     return NextResponse.json({ error: "수정할 내용이 없습니다." }, { status: 400 });
+  }
+
+  // 노트 무결성: 수정 결과가 본문도 사진도 없는 빈 노트가 되면 거부한다.
+  if (post.category === "note") {
+    const nextContent =
+      "content_markdown" in updates
+        ? (updates.content_markdown as string | null)
+        : post.content_markdown;
+    const nextImages =
+      "image_paths" in updates
+        ? (updates.image_paths as string[])
+        : (post.image_paths ?? []);
+    if ((!nextContent || nextContent.trim() === "") && nextImages.length === 0) {
+      return NextResponse.json(
+        { error: "필기노트는 본문(마크다운) 또는 필기 사진이 필요합니다." },
+        { status: 400 },
+      );
+    }
   }
 
   const { data: updated, error: dbError } = await admin
@@ -158,6 +201,15 @@ export async function PATCH(
     updates.file_path !== previousPath
   ) {
     await admin.storage.from("materials").remove([previousPath]);
+  }
+
+  // 노트 이미지 교체/제거 시 빠진 오브젝트 정리 — 실패해도 수정은 유지
+  if ("image_paths" in updates) {
+    const nextSet = new Set(updates.image_paths as string[]);
+    const removed = (post.image_paths ?? []).filter((p) => !nextSet.has(p));
+    if (removed.length > 0) {
+      await admin.storage.from("notes").remove(removed);
+    }
   }
   return NextResponse.json({ post: updated });
 }
@@ -186,6 +238,10 @@ export async function DELETE(
   // 첨부 파일 정리 (강의자료) — 실패해도 글 삭제는 유지 (고아 파일은 무해)
   if (post.file_path) {
     await admin.storage.from("materials").remove([post.file_path]);
+  }
+  // 필기노트 이미지 정리
+  if (post.image_paths && post.image_paths.length > 0) {
+    await admin.storage.from("notes").remove(post.image_paths);
   }
   return NextResponse.json({ deleted: true });
 }

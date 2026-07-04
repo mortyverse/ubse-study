@@ -145,6 +145,7 @@ export interface BoardPost {
   week_number: number | null;
   file_path: string | null;
   file_name: string | null;
+  image_paths: string[];
   created_at: string;
   updated_at: string;
 }
