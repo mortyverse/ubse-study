@@ -523,6 +523,24 @@ export type Database = {
           },
         ]
       }
+      plan_lectures: {
+        Row: {
+          lecture_number: number
+          updated_at: string
+          week_number: number
+        }
+        Insert: {
+          lecture_number: number
+          updated_at?: string
+          week_number: number
+        }
+        Update: {
+          lecture_number?: number
+          updated_at?: string
+          week_number?: number
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           approved_at: string | null

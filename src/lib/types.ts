@@ -149,6 +149,12 @@ export interface BoardPost {
   updated_at: string;
 }
 
+export interface PlanLecture {
+  lecture_number: number;
+  week_number: number;
+  updated_at: string;
+}
+
 export type HeroChipColor =
   | "violet"
   | "slate"
