@@ -63,6 +63,7 @@ export type AdminAnswerView = {
   ai_rationale: string | null
   final_score: number | null
   resolved_at: string | null
+  hasOpenDispute: boolean
 }
 
 export type AdminSubmissionView = {

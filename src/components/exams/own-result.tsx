@@ -25,22 +25,24 @@ function gradeStateOf(
 }
 
 // 시맨틱 상태색 (헌법): 정답 sage-green(success) · 부분 amber(warning) · 오답 rose(destructive)
+// 카드 테두리는 틀린 문항에만 은은하게 — 정답은 기본 카드 그대로(표시 없음),
+// 부분 점수는 연한 주황, 오답은 연한 빨강 전체 테두리.
 const GRADE_TONE: Record<
   GradeState,
   { card: string; pill: string; label: string }
 > = {
   correct: {
-    card: "border-l-4 border-l-success",
+    card: "",
     pill: "bg-success/15 text-[color-mix(in_srgb,var(--success)_75%,var(--foreground))]",
     label: "정답",
   },
   partial: {
-    card: "border-l-4 border-l-warning",
+    card: "border-warning/40",
     pill: "bg-warning/15 text-[color-mix(in_srgb,var(--warning)_60%,var(--foreground))]",
     label: "부분 점수",
   },
   wrong: {
-    card: "border-l-4 border-l-destructive",
+    card: "border-destructive/40",
     pill: "bg-destructive/15 text-[color-mix(in_srgb,var(--destructive)_75%,var(--foreground))]",
     label: "오답",
   },
@@ -106,10 +108,9 @@ function OwnResult({ result }: { result: MyResultView }) {
           .slice()
           .sort((a, b) => a.order - b.order)
           .map((a, i) => {
-            const effectiveScore =
-              a.resolved_at && a.final_score !== null
-                ? a.final_score
-                : a.ai_score
+            // 자동 확정 체제: final_score가 곧 확정 점수 (이의제기 중엔 null →
+            // AI 초안을 참고용으로 표시)
+            const effectiveScore = a.final_score ?? a.ai_score
             const gradeState =
               submission.grading_status === "completed"
                 ? gradeStateOf(effectiveScore, a.max_score)
@@ -164,7 +165,12 @@ function OwnResult({ result }: { result: MyResultView }) {
                           AI 초안 {a.ai_score ?? "—"}점
                         </Badge>
                         {a.resolved_at && a.final_score !== null && (
-                          <Badge>확정 {a.final_score}점</Badge>
+                          <Badge>관리자 확정 {a.final_score}점</Badge>
+                        )}
+                        {a.hasOpenDispute && (
+                          <Badge variant="outline" className="border-warning/50 text-[color-mix(in_srgb,var(--warning)_60%,var(--foreground))]">
+                            재검토 중
+                          </Badge>
                         )}
                       </div>
                       {a.ai_rationale && (

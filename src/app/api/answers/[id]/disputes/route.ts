@@ -6,6 +6,10 @@ import { createAdminClient } from "@/lib/supabase/admin";
  * 이의제기 등록 (승인 멤버, 본인 답안에만 — PRD §4.2 step 4).
  * 채점 완료(completed) 후에만 가능. 같은 답안에 열린 이의제기가 있으면 중복 불가.
  * 등록되는 순간 해당 답안은 RLS 정책상 전체 승인 멤버에게 공개된다(토론용).
+ *
+ * 자동 확정 해제 (owner 결정, 2026-07-05): AI 채점은 기본 확정 상태이므로,
+ * 이의제기가 등록되면 해당 답안의 확정(final_score)을 해제한다. 토론 후
+ * 관리자가 다시 확정할 때까지 이 문항은 총점/랭킹에서 제외된다.
  */
 export async function POST(
   _request: Request,
@@ -65,5 +69,12 @@ export async function POST(
   if (insertError || !dispute) {
     return NextResponse.json({ error: "이의제기 등록에 실패했습니다." }, { status: 500 });
   }
+
+  // 확정 해제 — 관리자가 토론 후 다시 확정할 때까지 미확정 상태로 둔다
+  await admin
+    .from("exam_answers")
+    .update({ final_score: null, resolved_by: null, resolved_at: null })
+    .eq("id", answerId);
+
   return NextResponse.json({ dispute }, { status: 201 });
 }

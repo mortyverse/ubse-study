@@ -153,6 +153,8 @@ describe("POST /api/answers/[id]/disputes", () => {
           },
           error: null,
         },
+        // 자동 확정 해제 (final_score/resolved_* null 초기화)
+        update: { data: null, error: null },
       },
       exam_disputes: {
         select: { data: null, error: null },
@@ -171,5 +173,44 @@ describe("POST /api/answers/[id]/disputes", () => {
     expect(res.status).toBe(201);
     expect(body.dispute.answer_id).toBe("ans-1");
     expect(body.dispute.created_by).toBe("member-1");
+  });
+
+  it("clears the auto-confirmed final score when the dispute is filed (확정 해제)", async () => {
+    requireApprovedMock.mockResolvedValue({ profile: memberProfile("member-1"), error: null });
+    const supa = createSupabaseMock({
+      exam_answers: {
+        select: {
+          data: {
+            id: "ans-1",
+            ai_score: 5,
+            exam_submissions: { user_id: "member-1", grading_status: "completed" },
+          },
+          error: null,
+        },
+        update: { data: null, error: null },
+      },
+      exam_disputes: {
+        select: { data: null, error: null },
+        insert: {
+          data: { id: "dispute-new", answer_id: "ans-1", created_by: "member-1", status: "open" },
+          error: null,
+        },
+      },
+    });
+    createAdminClientMock.mockReturnValue({ from: supa.from });
+    const { POST } = await import("@/app/api/answers/[id]/disputes/route");
+
+    await POST(req(), params());
+
+    const [updateChain] = supa.chainsByTable.exam_answers.filter((c) =>
+      c.__calls.some((cc) => cc.method === "update"),
+    );
+    expect(updateChain).toBeDefined();
+    expect(updateChain.__calls.find((c) => c.method === "update")!.args[0]).toEqual({
+      final_score: null,
+      resolved_by: null,
+      resolved_at: null,
+    });
+    expect(updateChain.__calls).toContainEqual({ method: "eq", args: ["id", "ans-1"] });
   });
 });

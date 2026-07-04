@@ -61,9 +61,9 @@ describe("gradeSubmission", () => {
     expect(gradeAnswerMock).not.toHaveBeenCalled();
   });
 
-  it("grades each answer via gradeAnswer and writes ONLY ai_score/ai_rationale — final_score never appears in any update payload", async () => {
+  it("writes ai draft + auto-confirms final_score for unconfirmed answers, but preserves an existing admin final_score", async () => {
     gradeAnswerMock.mockImplementation(async ({ maxScore }: { maxScore: number }) => ({
-      score: maxScore, // arbitrary — the assertion cares about the write payload's keys
+      score: maxScore, // AI가 만점을 준 상황 — 자동 확정 시 final_score = ai_score
       rationale: "근거",
     }));
     const supa = createSupabaseMock({
@@ -76,8 +76,10 @@ describe("gradeSubmission", () => {
       exam_answers: {
         select: {
           data: [
-            { id: "ans-1", question_id: "q-1", answer_text: "답1" },
-            { id: "ans-2", question_id: "q-2", answer_text: "답2" },
+            // 미확정 → 자동 확정 대상
+            { id: "ans-1", question_id: "q-1", answer_text: "답1", final_score: null },
+            // 관리자가 이미 확정(재채점 경로) → final_score 보존
+            { id: "ans-2", question_id: "q-2", answer_text: "답2", final_score: 5 },
           ],
           error: null,
         },
@@ -110,13 +112,28 @@ describe("gradeSubmission", () => {
       answerText: "답2",
     });
 
-    for (const chain of supa.chainsByTable.exam_answers) {
-      const updateCall = chain.__calls.find((c) => c.method === "update");
-      if (!updateCall) continue;
-      const payload = updateCall.args[0] as Record<string, unknown>;
-      expect(Object.keys(payload).sort()).toEqual(["ai_rationale", "ai_score"]);
-      expect(payload).not.toHaveProperty("final_score");
-    }
+    const payloadFor = (answerId: string) => {
+      const chain = supa.chainsByTable.exam_answers.find(
+        (c) =>
+          c.__calls.some((cc) => cc.method === "update") &&
+          c.__calls.some(
+            (cc) => cc.method === "eq" && cc.args[0] === "id" && cc.args[1] === answerId,
+          ),
+      );
+      return chain?.__calls.find((c) => c.method === "update")?.args[0] as Record<
+        string,
+        unknown
+      >;
+    };
+
+    // 미확정 답안: AI 초안 + 자동 확정 (final_score = ai_score)
+    expect(payloadFor("ans-1")).toEqual({
+      ai_score: 10,
+      ai_rationale: "근거",
+      final_score: 10,
+    });
+    // 관리자 확정 답안: AI 초안만 갱신, final_score는 건드리지 않는다
+    expect(payloadFor("ans-2")).toEqual({ ai_score: 20, ai_rationale: "근거" });
 
     // final update transitions grading_status to completed
     const submissionUpdates = supa.chainsByTable.exam_submissions.map(

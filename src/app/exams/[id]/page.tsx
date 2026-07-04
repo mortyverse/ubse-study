@@ -191,6 +191,14 @@ export default async function ExamDetailPage({
       })),
     }))
 
+  // 자동 확정 체제: 관리자 확정 UI는 열린 이의제기가 있는 답안에만 노출된다
+  const openDisputeAnswerIdsAll = new Set(
+    examDisputesRaw
+      .filter((d) => d.status === "open")
+      .map((d) => d.exam_answers?.id)
+      .filter(Boolean),
+  )
+
   let adminSubmissions: AdminSubmissionView[] = []
   if (profile.role === "admin") {
     const { data: allSubmissions } = await supabase
@@ -233,6 +241,7 @@ export default async function ExamDetailPage({
         ai_rationale: a.ai_rationale,
         final_score: a.final_score,
         resolved_at: a.resolved_at,
+        hasOpenDispute: openDisputeAnswerIdsAll.has(a.id),
       })),
     }))
   }

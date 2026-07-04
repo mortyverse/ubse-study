@@ -3,10 +3,11 @@ import { requireAdmin } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
- * 관리자 최종 채점 확정 (PRD §4.2 step 5).
- * 정답↔오답 양방향 변경 가능 — final_score를 몇 번이고 다시 쓸 수 있다.
- * 확정 시 해당 답안의 열린 이의제기는 resolved 처리된다.
- * 총점/랭킹에는 이 final_score만 반영된다 (AI 초안 미반영, step 6).
+ * 관리자 최종 채점 확정 (PRD §4.2 step 5, owner 결정으로 범위 축소 2026-07-05).
+ * AI 채점 결과는 자동 확정되므로, 관리자 확정은 (a) 열린 이의제기가 있는
+ * 답안(토론 후 재확정, 정답↔오답 양방향) 또는 (b) 미확정 답안(final_score
+ * null — AI 채점 실패 구제)에만 허용한다. 확정 시 열린 이의제기는 resolved.
+ * 총점/랭킹에는 final_score만 반영된다 (step 6).
  */
 export async function PATCH(
   request: Request,
@@ -31,7 +32,7 @@ export async function PATCH(
   const admin = createAdminClient();
   const { data: answer } = await admin
     .from("exam_answers")
-    .select("id, exam_questions!inner(max_score)")
+    .select("id, final_score, exam_questions!inner(max_score)")
     .eq("id", answerId)
     .maybeSingle();
   if (!answer) {
@@ -39,6 +40,22 @@ export async function PATCH(
   }
   const maxScore = (answer.exam_questions as unknown as { max_score: number })
     .max_score;
+
+  // 자동 확정 체제: 이미 확정된 답안은 열린 이의제기가 있을 때만 재확정 가능
+  if (answer.final_score !== null) {
+    const { data: openDispute } = await admin
+      .from("exam_disputes")
+      .select("id")
+      .eq("answer_id", answerId)
+      .eq("status", "open")
+      .maybeSingle();
+    if (!openDispute) {
+      return NextResponse.json(
+        { error: "이의제기가 진행 중인 답안만 다시 확정할 수 있습니다." },
+        { status: 409 },
+      );
+    }
+  }
   if (finalScore > maxScore) {
     return NextResponse.json(
       { error: `final_score는 배점(${maxScore}점)을 넘을 수 없습니다.` },

@@ -44,7 +44,18 @@ function params(id = "ans-1") {
   return { params: Promise.resolve({ id }) };
 }
 
-const ANSWER_MAX_10 = { id: "ans-1", exam_questions: { max_score: 10 } };
+// 자동 확정 체제: final_score null = 미확정 (확정 가능), non-null = 확정됨
+// (열린 이의제기가 있어야만 재확정 가능)
+const ANSWER_MAX_10 = {
+  id: "ans-1",
+  final_score: null,
+  exam_questions: { max_score: 10 },
+};
+const CONFIRMED_ANSWER_MAX_10 = {
+  id: "ans-1",
+  final_score: 8,
+  exam_questions: { max_score: 10 },
+};
 
 describe("PATCH /api/answers/[id]/final", () => {
   beforeEach(() => {
@@ -179,16 +190,18 @@ describe("PATCH /api/answers/[id]/final", () => {
     expect(disputesChain.__calls).toContainEqual({ method: "eq", args: ["status", "open"] });
   });
 
-  it("allows re-confirming with a different score (bidirectional correct<->incorrect flip)", async () => {
+  it("allows re-confirming an already-confirmed answer when an open dispute exists (bidirectional flip)", async () => {
     const supa = createSupabaseMock({
       exam_answers: {
-        select: { data: ANSWER_MAX_10, error: null },
+        select: { data: CONFIRMED_ANSWER_MAX_10, error: null },
         update: {
           data: { id: "ans-1", final_score: 2, resolved_by: "admin-1", resolved_at: "y" },
           error: null,
         },
       },
       exam_disputes: {
+        // 열린 이의제기 존재 → 재확정 허용, 이후 resolved 처리
+        select: { data: { id: "dispute-1" }, error: null },
         update: { data: null, error: null },
       },
     });
@@ -201,5 +214,24 @@ describe("PATCH /api/answers/[id]/final", () => {
 
     expect(res.status).toBe(200);
     expect(body.answer.final_score).toBe(2);
+  });
+
+  it("rejects re-confirming an already-confirmed answer with no open dispute (409)", async () => {
+    const supa = createSupabaseMock({
+      exam_answers: {
+        select: { data: CONFIRMED_ANSWER_MAX_10, error: null },
+      },
+      exam_disputes: {
+        select: { data: null, error: null },
+      },
+    });
+    createAdminClientMock.mockReturnValue({ from: supa.from });
+    const { PATCH } = await import("@/app/api/answers/[id]/final/route");
+
+    const res = await PATCH(req({ final_score: 2 }), params());
+    const body = await res.json();
+
+    expect(res.status).toBe(409);
+    expect(body.error).toContain("이의제기");
   });
 });
