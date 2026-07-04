@@ -78,30 +78,30 @@
 
 ### 2A. 시험 · AI 채점 · 이의제기 (§4.2)
 - [x] **[직접]** Gemini API Key `.env.local` 입력 (미입력 시 채점 불가)
-- [ ] `0003_create_exams.sql`: `exams`, `exam_questions(max_score, order)`, `exam_submissions(started_at, submitted_at)`, `exam_answers(answer_text, ai_score, ai_rationale, final_score, resolved_by, resolved_at)`, `exam_disputes`, `exam_dispute_comments` + 인덱스
-- [ ] exams RLS: 시험 생성/최종채점 admin 전용, 본인 submission·answer만 조회/작성, `final_score`·`resolved_by`는 admin만 기록, 이의제기·댓글은 승인 사용자
-- [ ] 시험 생성 API (admin): 문제(텍스트)·배점·제한시간(분)
-- [ ] 응시 시작 API: `started_at` 서버 기록
-- [ ] 남은 시간 = 서버 `started_at`+제한시간 기준 계산 (localStorage 금지)
-- [ ] 제출 API + 제한시간 초과 시 자동 제출
-- [ ] Gemini 1차 채점(비동기): `gemini-3.1-flash-lite`, thinking `medium`+, 문항별 점수+근거(rationale) 저장, 제출 직후 "채점 중" → 완료 시 갱신
-- [ ] 이의제기 등록 API + 댓글 API (토론)
-- [ ] 관리자 최종 확정 API: 정답↔오답 양방향 변경, `final_score`/`resolved_by`/`resolved_at`
-- [ ] 시험 목록 / 응시 화면(서버 타이머) / 결과 화면(AI 점수+근거)
-- [ ] 이의제기 + 댓글 토론 UI, admin 시험 생성 + 최종 채점 UI
+- [x] `0003_create_exams.sql`(실제 파일명 `0005_create_exams.sql` — 0003/0004는 하드닝·grant 수정에 사용됨): `exams`, `exam_questions(max_score, order)`, `exam_submissions(started_at, submitted_at)`, `exam_answers(answer_text, ai_score, ai_rationale, final_score, resolved_by, resolved_at)`, `exam_disputes`, `exam_dispute_comments` + 인덱스
+- [x] exams RLS: 시험 생성/최종채점 admin 전용, 본인 submission·answer만 조회/작성, `final_score`·`resolved_by`는 admin만 기록, 이의제기·댓글은 승인 사용자
+- [x] 시험 생성 API (admin): 문제(텍스트)·배점·제한시간(분)
+- [x] 응시 시작 API: `started_at` 서버 기록
+- [x] 남은 시간 = 서버 `started_at`+제한시간 기준 계산 (localStorage 금지)
+- [x] 제출 API + 제한시간 초과 시 자동 제출
+- [x] Gemini 1차 채점(비동기): `gemini-3.1-flash-lite`, thinking `medium`+, 문항별 점수+근거(rationale) 저장, 제출 직후 "채점 중" → 완료 시 갱신
+- [x] 이의제기 등록 API + 댓글 API (토론)
+- [x] 관리자 최종 확정 API: 정답↔오답 양방향 변경, `final_score`/`resolved_by`/`resolved_at`
+- [x] 시험 목록 / 응시 화면(서버 타이머) / 결과 화면(AI 점수+근거)
+- [x] 이의제기 + 댓글 토론 UI, admin 시험 생성 + 최종 채점 UI
 
 ### 2B. 마이페이지 + 랭킹 (§4.4)
-- [ ] `0004_create_scoring.sql`: 총점 가중치 설정 저장(예: `app_settings` key-value 또는 `scoring_config`), 사용자 프로필 링크 컬럼(github_url, project_url) — users 확장 또는 별도 테이블 + RLS
-- [ ] 총점 계산: **admin 확정 최종 점수 합** + 출석률 × 가중치(admin 설정 가능). AI 1차 점수는 미반영
-- [ ] 랭킹 API: 총점 정렬, **실명 전체 공개**(익명화 없음)
-- [ ] 마이페이지: 본인 점수 추이 그래프, 출석 이력
-- [ ] 전체 랭킹표(실명·총점), GitHub/프로젝트 링크 등록·노출 (본인만 수정)
-- [ ] admin 가중치 설정 UI
+- [x] `0004_create_scoring.sql`(실제 파일명 `0006_create_scoring.sql`): 총점 가중치 설정 저장(예: `app_settings` key-value 또는 `scoring_config`), 사용자 프로필 링크 컬럼(github_url, project_url) — users 확장 또는 별도 테이블 + RLS
+- [x] 총점 계산: **admin 확정 최종 점수 합** + 출석률 × 가중치(admin 설정 가능). AI 1차 점수는 미반영
+- [x] 랭킹 API: 총점 정렬, **실명 전체 공개**(익명화 없음)
+- [x] 마이페이지: 본인 점수 추이 그래프, 출석 이력
+- [x] 전체 랭킹표(실명·총점), GitHub/프로젝트 링크 등록·노출 (본인만 수정)
+- [x] admin 가중치 설정 UI
 
 ### 2 검수
-- [ ] `rls-security-auditor`: 타인 답안/점수 조작, `final_score` 쓰기 권한, 랭킹은 최종점수만, 제한시간 서버검증
-- [ ] `server-logic-tester`: 제한시간/자동제출/최종점수만 총점 반영/가중치 계산
-- [ ] `ui-design-implementer`: 응시·결과·랭킹·차트(팔레트 순서) 검증
+- [x] `rls-security-auditor`: 타인 답안/점수 조작, `final_score` 쓰기 권한, 랭킹은 최종점수만, 제한시간 서버검증 — Critical~Medium 0건 (지적된 토론 가시성 버그·중복 이의제기 레이스는 수정/0007로 조치)
+- [x] `server-logic-tester`: 제한시간/자동제출/최종점수만 총점 반영/가중치 계산 — 95개 신규, 총 165개 통과
+- [x] `ui-design-implementer`: 응시·결과·랭킹·차트(팔레트 순서) 검증 — 빌드/린트/로그아웃 브라우저 검증 (인증 화면은 코드 트레이스; OAuth 로그인 불가 환경)
 
 ---
 

@@ -50,6 +50,8 @@ const MODIFIER_METHODS = [
   "lt",
   "lte",
   "in",
+  "is",
+  "not",
   "order",
   "limit",
   "single",

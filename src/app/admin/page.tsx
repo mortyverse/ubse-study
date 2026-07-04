@@ -2,9 +2,11 @@ import { redirect } from "next/navigation";
 
 import { getSessionProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { getScoringSettings } from "@/lib/ranking";
 import { Container } from "@/components/layout/container";
 import { PageHeader } from "@/components/common/page-header";
 import { ApprovalsTable } from "@/components/admin/approvals-table";
+import { WeightSettingsCard } from "@/components/admin/weight-settings-card";
 
 export default async function AdminPage() {
   const { userId, profile } = await getSessionProfile();
@@ -14,17 +16,23 @@ export default async function AdminPage() {
   if (profile.role !== "admin") redirect("/");
 
   const supabase = await createClient();
-  const { data: pendingUsers } = await supabase
-    .from("users")
-    .select("id, display_name, github_username, avatar_url, status, created_at")
-    .eq("status", "pending")
-    .order("created_at", { ascending: true });
+  const [{ data: pendingUsers }, scoringSettings] = await Promise.all([
+    supabase
+      .from("users")
+      .select("id, display_name, github_username, avatar_url, status, created_at")
+      .eq("status", "pending")
+      .order("created_at", { ascending: true }),
+    getScoringSettings(),
+  ]);
 
   return (
     <main className="flex-1">
       <Container className="flex flex-col gap-10 pt-28 pb-20 md:pt-32">
         <PageHeader eyebrow="ADMIN" title="가입 승인 관리" />
         <ApprovalsTable initialUsers={pendingUsers ?? []} />
+
+        <PageHeader eyebrow="ADMIN" title="랭킹 설정" />
+        <WeightSettingsCard attendanceWeight={scoringSettings.attendance_weight} />
       </Container>
     </main>
   );

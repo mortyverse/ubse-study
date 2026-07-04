@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_settings: {
+        Row: {
+          description: string | null
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          description?: string | null
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          description?: string | null
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
       attendance_records: {
         Row: {
           checked_at: string | null
@@ -106,6 +127,278 @@ export type Database = {
           },
         ]
       }
+      exam_answers: {
+        Row: {
+          ai_rationale: string | null
+          ai_score: number | null
+          answer_text: string | null
+          created_at: string
+          final_score: number | null
+          id: string
+          question_id: string
+          resolved_at: string | null
+          resolved_by: string | null
+          submission_id: string
+          updated_at: string
+        }
+        Insert: {
+          ai_rationale?: string | null
+          ai_score?: number | null
+          answer_text?: string | null
+          created_at?: string
+          final_score?: number | null
+          id?: string
+          question_id: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          submission_id: string
+          updated_at?: string
+        }
+        Update: {
+          ai_rationale?: string | null
+          ai_score?: number | null
+          answer_text?: string | null
+          created_at?: string
+          final_score?: number | null
+          id?: string
+          question_id?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          submission_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "exam_questions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_answers_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_answers_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "exam_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exam_dispute_comments: {
+        Row: {
+          content: string
+          created_at: string
+          dispute_id: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          dispute_id: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          dispute_id?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_dispute_comments_dispute_id_fkey"
+            columns: ["dispute_id"]
+            isOneToOne: false
+            referencedRelation: "exam_disputes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_dispute_comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exam_disputes: {
+        Row: {
+          answer_id: string
+          created_at: string
+          created_by: string
+          id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          answer_id: string
+          created_at?: string
+          created_by: string
+          id?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          answer_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_disputes_answer_id_fkey"
+            columns: ["answer_id"]
+            isOneToOne: false
+            referencedRelation: "exam_answers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_disputes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exam_questions: {
+        Row: {
+          created_at: string
+          exam_id: string
+          id: string
+          max_score: number
+          order: number
+          question_text: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          exam_id: string
+          id?: string
+          max_score: number
+          order: number
+          question_text: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          exam_id?: string
+          id?: string
+          max_score?: number
+          order?: number
+          question_text?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_questions_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exam_submissions: {
+        Row: {
+          created_at: string
+          exam_id: string
+          grading_status: string
+          id: string
+          started_at: string
+          submitted_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          exam_id: string
+          grading_status?: string
+          id?: string
+          started_at?: string
+          submitted_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          exam_id?: string
+          grading_status?: string
+          id?: string
+          started_at?: string
+          submitted_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_submissions_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_submissions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exams: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          time_limit_minutes: number
+          title: string
+          updated_at: string
+          week_number: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          time_limit_minutes: number
+          title: string
+          updated_at?: string
+          week_number: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          time_limit_minutes?: number
+          title?: string
+          updated_at?: string
+          week_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exams_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           approved_at: string | null
@@ -114,8 +407,10 @@ export type Database = {
           created_at: string
           display_name: string
           github_id: string | null
+          github_url: string | null
           github_username: string | null
           id: string
+          project_url: string | null
           role: Database["public"]["Enums"]["user_role"]
           status: Database["public"]["Enums"]["user_status"]
           updated_at: string
@@ -127,8 +422,10 @@ export type Database = {
           created_at?: string
           display_name: string
           github_id?: string | null
+          github_url?: string | null
           github_username?: string | null
           id: string
+          project_url?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           status?: Database["public"]["Enums"]["user_status"]
           updated_at?: string
@@ -140,8 +437,10 @@ export type Database = {
           created_at?: string
           display_name?: string
           github_id?: string | null
+          github_url?: string | null
           github_username?: string | null
           id?: string
+          project_url?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           status?: Database["public"]["Enums"]["user_status"]
           updated_at?: string
