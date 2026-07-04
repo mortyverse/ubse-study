@@ -42,15 +42,48 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims()
   const user = data?.claims
 
-  if (
-    request.nextUrl.pathname !== "/" &&
-    !user &&
-    !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/auth")
-  ) {
+  const path = request.nextUrl.pathname
+  const isPublic = path === "/" || path.startsWith("/auth")
+  // API는 리다이렉트하지 않는다 — 각 라우트가 requireApproved/requireAdmin으로
+  // 401/403을 반환한다 (승인 게이트 2계층).
+  const isApi = path.startsWith("/api")
+
+  const redirect = (pathname: string) => {
     const url = request.nextUrl.clone()
-    url.pathname = "/auth/login"
+    url.pathname = pathname
     return NextResponse.redirect(url)
+  }
+
+  if (!user) {
+    if (!isPublic && !isApi) {
+      return redirect("/auth/login")
+    }
+    return supabaseResponse
+  }
+
+  if (!isApi) {
+    // 승인 게이트 1계층(라우팅 가드): pending/rejected는 /pending 밖으로 못 나간다.
+    // 행이 아직 없으면(트리거 지연 등) pending으로 취급한다.
+    const { data: profile } = await supabase
+      .from("users")
+      .select("status, role")
+      .eq("id", user.sub)
+      .single()
+
+    const status = profile?.status ?? "pending"
+
+    if (status !== "approved") {
+      if (path !== "/pending" && !path.startsWith("/auth")) {
+        return redirect("/pending")
+      }
+    } else {
+      if (path === "/pending" || path.startsWith("/auth/login")) {
+        return redirect("/")
+      }
+      if (path.startsWith("/admin") && profile?.role !== "admin") {
+        return redirect("/")
+      }
+    }
   }
 
   // supabaseResponse를 반드시 그대로 반환할 것. 새 NextResponse를

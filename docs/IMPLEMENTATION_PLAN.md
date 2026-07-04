@@ -46,38 +46,38 @@
 ## Phase 1 — 인증 + 출석 (PRD §4.0, §4.1)
 
 ### 1A. 회원가입 / 로그인 승인 게이트 (§4.0)
-- [ ] `0001_create_users.sql`: `users(role enum admin|member, status enum pending|approved|rejected, github_id/username, display_name, avatar_url, approved_by, approved_at, created_at)` + 인덱스
-- [ ] users RLS: 본인 행 조회 / admin 전체 조회·수정 / status·role은 admin만 변경 / single-admin 보장(admin 1명 초과 방지)
-- [ ] GitHub OAuth 로그인·로그아웃·콜백 라우트 (Supabase Auth)
-- [ ] 최초 로그인 시 `users` 행 자동 생성(`status=pending`) — DB 트리거 또는 콜백 서버 로직
-- [ ] 승인 대기 화면(`pending`/`rejected` 안내) — 그 외 기능 접근 불가
-- [ ] 3계층 접근 차단: 미들웨어(라우팅 가드) + API 라우트 검증 + RLS 모두에서 pending/rejected 차단
-- [ ] **[직접]** 본인 GitHub username 제공 → (AI) MCP로 해당 계정 `role=admin, status=approved` 승격 (최초 관리자 지정)
-- [ ] 관리자 "가입 승인 관리" 페이지: 대기 목록 + 승인/거절 (admin 전용 API + RLS)
+- [x] `0001_create_users.sql`: `users(role enum admin|member, status enum pending|approved|rejected, github_id/username, display_name, avatar_url, approved_by, approved_at, created_at)` + 인덱스
+- [x] users RLS: 본인 행 조회 / admin 전체 조회·수정 / status·role은 admin만 변경 / single-admin 보장(admin 1명 초과 방지)
+- [x] GitHub OAuth 로그인·로그아웃·콜백 라우트 (Supabase Auth)
+- [x] 최초 로그인 시 `users` 행 자동 생성(`status=pending`) — DB 트리거 또는 콜백 서버 로직
+- [x] 승인 대기 화면(`pending`/`rejected` 안내) — 그 외 기능 접근 불가
+- [x] 3계층 접근 차단: 미들웨어(라우팅 가드) + API 라우트 검증 + RLS 모두에서 pending/rejected 차단
+- [x] **[직접]** 본인 GitHub username 제공 → (AI) MCP로 해당 계정 `role=admin, status=approved` 승격 (최초 관리자 지정) *(mortyverse 승격 완료 2026-07-04)*
+- [x] 관리자 "가입 승인 관리" 페이지: 대기 목록 + 승인/거절 (admin 전용 API + RLS)
 
 ### 1B. 출석 (실시간 코드 인증, §4.1)
-- [ ] `0002_create_attendance.sql`: `attendance_sessions(week_number, code, duration_minutes, opened_at, closes_at, is_active, created_by)`, `attendance_records(session_id, user_id, status enum 출석|지각|결석, checked_at)` + 인덱스
-- [ ] attendance RLS: **`code`는 admin 클라이언트만 select 가능**, `duration_minutes` CHECK(1–5), 본인 record만 갱신 불가(검증은 서버), admin 전체 관리
-- [ ] Realtime 활성화(publication)로 로스터 상태 변경 브로드캐스트
-- [ ] 세션 시작 API (admin): 랜덤 4자리 코드 생성, `duration_minutes` 1–5 서버 검증, `closes_at = opened_at + duration`, `is_active=true`
-- [ ] 코드 검증 API (member): `is_active` && `now < closes_at` && 코드 일치 → `출석` + `checked_at`; 이미 출석 시 "이미 출석 처리되었습니다"
-- [ ] 세션 자동 종료: `closes_at` 경과 시 `is_active=false`, 미입력자 `결석` 유지 (서버 시간 기준)
-- [ ] admin 수동 상태 조정 API (지각 등)
-- [ ] 출석 페이지 로스터: 이름 + 아바타 + 상태 뱃지(기본 결석), Realtime 구독 반영
-- [ ] admin 화면: 시간 설정(1–5) + 시작 버튼 + **코드/카운트다운 표시**
-- [ ] member 화면: 4자리 입력 인풋만(코드 비노출), 모바일 thumb-friendly
+- [x] `0002_create_attendance.sql`: `attendance_sessions(week_number, code, duration_minutes, opened_at, closes_at, is_active, created_by)`, `attendance_records(session_id, user_id, status enum 출석|지각|결석, checked_at)` + 인덱스
+- [x] attendance RLS: **`code`는 admin 클라이언트만 select 가능**, `duration_minutes` CHECK(1–5), 본인 record만 갱신 불가(검증은 서버), admin 전체 관리
+- [x] Realtime 활성화(publication)로 로스터 상태 변경 브로드캐스트
+- [x] 세션 시작 API (admin): 랜덤 4자리 코드 생성, `duration_minutes` 1–5 서버 검증, `closes_at = opened_at + duration`, `is_active=true`
+- [x] 코드 검증 API (member): `is_active` && `now < closes_at` && 코드 일치 → `출석` + `checked_at`; 이미 출석 시 "이미 출석 처리되었습니다"
+- [x] 세션 자동 종료: `closes_at` 경과 시 `is_active=false`, 미입력자 `결석` 유지 (서버 시간 기준)
+- [x] admin 수동 상태 조정 API (지각 등)
+- [x] 출석 페이지 로스터: 이름 + 아바타 + 상태 뱃지(기본 결석), Realtime 구독 반영
+- [x] admin 화면: 시간 설정(1–5) + 시작 버튼 + **코드/카운트다운 표시**
+- [x] member 화면: 4자리 입력 인풋만(코드 비노출), 모바일 thumb-friendly
 
 ### 1 검수
-- [ ] `rls-security-auditor`: 승인 게이트 우회, 코드 노출, single-admin, 서버시간
-- [ ] `server-logic-tester`: 코드 검증/`duration` 범위/자동 종료/재입력/승인 상태 전이
-- [ ] `ui-design-implementer`: 네비·로스터·입력 화면 디자인 대조 + 브라우저 렌더 검증
+- [x] `rls-security-auditor`: 승인 게이트 우회, 코드 노출, single-admin, 서버시간
+- [x] `server-logic-tester`: 코드 검증/`duration` 범위/자동 종료/재입력/승인 상태 전이
+- [x] `ui-design-implementer`: 네비·로스터·입력 화면 디자인 대조 + 브라우저 렌더 검증
 
 ---
 
 ## Phase 2 — 온라인 시험 + 마이페이지 (PRD §4.2, §4.4)
 
 ### 2A. 시험 · AI 채점 · 이의제기 (§4.2)
-- [ ] **[직접]** Gemini API Key `.env.local` 입력 (미입력 시 채점 불가)
+- [x] **[직접]** Gemini API Key `.env.local` 입력 (미입력 시 채점 불가)
 - [ ] `0003_create_exams.sql`: `exams`, `exam_questions(max_score, order)`, `exam_submissions(started_at, submitted_at)`, `exam_answers(answer_text, ai_score, ai_rationale, final_score, resolved_by, resolved_at)`, `exam_disputes`, `exam_dispute_comments` + 인덱스
 - [ ] exams RLS: 시험 생성/최종채점 admin 전용, 본인 submission·answer만 조회/작성, `final_score`·`resolved_by`는 admin만 기록, 이의제기·댓글은 승인 사용자
 - [ ] 시험 생성 API (admin): 문제(텍스트)·배점·제한시간(분)

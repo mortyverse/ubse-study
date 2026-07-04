@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Hanken_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import { SiteNav } from "@/components/layout/site-nav";
+import { SiteNav, type NavUser } from "@/components/layout/site-nav";
+import { Toaster } from "@/components/ui/sonner";
+import { getSessionProfile } from "@/lib/auth";
 
 const hankenGrotesk = Hanken_Grotesk({
   variable: "--font-hanken-grotesk",
@@ -23,19 +25,30 @@ export const metadata: Metadata = {
   description: "UbSE 스터디 운영 사이트 — 출석, 시험, 게시판, 랭킹",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { profile } = await getSessionProfile();
+  const navUser: NavUser = profile
+    ? {
+        displayName: profile.display_name,
+        avatarUrl: profile.avatar_url,
+        role: profile.role,
+        status: profile.status,
+      }
+    : null;
+
   return (
     <html
       lang="ko"
       className={`${hankenGrotesk.variable} ${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <SiteNav />
+        <SiteNav user={navUser} />
         {children}
+        <Toaster />
       </body>
     </html>
   );
