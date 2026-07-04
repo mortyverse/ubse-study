@@ -117,6 +117,20 @@ export interface ExamDisputeComment {
   updated_at: string;
 }
 
+// ── Phase 3: 주차별 계획 (0008) ─────────────────────────────────────────────
+
+export interface WeeklyPlan {
+  id: string;
+  week_number: number;
+  section_number: number;
+  lecture_range: string;
+  title: string;
+  is_completed: boolean;
+  resource_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 // ── Phase 2: 총점/랭킹 (0006) ───────────────────────────────────────────────
 
 /** app_settings 'scoring' row의 value */

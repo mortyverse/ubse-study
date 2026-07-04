@@ -106,13 +106,13 @@
 ---
 
 ## Phase 3 — 메인 대시보드 + 주차별 계획 (PRD §4.3, §4.7)
-- [ ] `0005_create_weekly_plans.sql`: `weekly_plans(week_number, section_number, lecture_range, title, is_completed)` + RLS(admin 토글, member 읽기)
-- [ ] 시드: 10주 커리큘럼 데이터 + `resource_url`(인프런 강의 링크)
-- [ ] 주차 완료 토글 API (admin) → 진도율 자동 계산
-- [ ] 통계 집계: 주차별 평균 점수 추이 / 주차별 출석률 추이 / 본인 vs 전체 평균
-- [ ] 메인 대시보드: 통계 그래프 3종 + 본인 비교 위젯 (**출결 현황은 메인에 표시하지 않음**)
-- [ ] 주차별 계획 표 + 진행바: admin 체크박스 토글, member 읽기 전용
-- [ ] 검수: `ui-design-implementer`(차트/표), `rls-security-auditor`(토글 admin 전용)
+- [x] `0005_create_weekly_plans.sql`(실제 파일명 `0008_create_weekly_plans.sql`): `weekly_plans(week_number, section_number, lecture_range, title, is_completed)` + RLS(admin 토글, member 읽기)
+- [x] 시드: 10주 커리큘럼 데이터 + `resource_url`(인프런 강의 링크)
+- [x] 주차 완료 토글 API (admin) → 진도율 자동 계산
+- [x] 통계 집계: 주차별 평균 점수 추이 / 주차별 출석률 추이 / 본인 vs 전체 평균
+- [x] 메인 대시보드: 통계 그래프 3종 + 본인 비교 위젯 (**출결 현황은 메인에 표시하지 않음**)
+- [x] 주차별 계획 표 + 진행바: admin 체크박스 토글, member 읽기 전용
+- [x] 검수: `ui-design-implementer`(차트/표), `rls-security-auditor`(토글 admin 전용) — 클린
 
 ---
 
