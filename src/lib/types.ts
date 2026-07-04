@@ -149,6 +149,23 @@ export interface BoardPost {
   updated_at: string;
 }
 
+export type HeroChipColor =
+  | "violet"
+  | "slate"
+  | "sage"
+  | "terracotta"
+  | "amber"
+  | "peach"
+  | "pink";
+
+export interface HeroChip {
+  id: string;
+  label: string;
+  color: HeroChipColor;
+  created_by: string | null;
+  created_at: string;
+}
+
 export interface BoardComment {
   id: string;
   post_id: string;

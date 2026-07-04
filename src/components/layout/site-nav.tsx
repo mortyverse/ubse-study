@@ -26,8 +26,8 @@ import {
   SheetClose,
 } from "@/components/ui/sheet"
 
+// "메인" 링크는 두지 않는다 — 로고 클릭이 홈으로 간다
 const NAV_LINKS = [
-  { href: "/", label: "메인" },
   { href: "/attendance", label: "출석" },
   { href: "/exams", label: "시험" },
   { href: "/board", label: "게시판" },

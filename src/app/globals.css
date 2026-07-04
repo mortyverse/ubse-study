@@ -190,3 +190,12 @@
     letter-spacing: -0.03em;
   }
 }
+
+/* 풀페이지 스냅 스크롤 컨테이너 — 스크롤은 되지만 스크롤바는 감춘다 */
+@utility scrollbar-hidden {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

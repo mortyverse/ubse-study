@@ -3,7 +3,6 @@ import { createClient } from "@/lib/supabase/server"
 import { buildDashboardStats } from "@/lib/stats"
 import { buildRanking } from "@/lib/ranking"
 import { Container } from "@/components/layout/container"
-import { PageHeader } from "@/components/common/page-header"
 import { EmptyState } from "@/components/common/empty-state"
 import {
   Card,
@@ -13,6 +12,7 @@ import {
   CardDescription,
 } from "@/components/ui/card"
 import { LandingHero } from "@/components/home/landing-hero"
+import { GravityHero } from "@/components/home/gravity-hero"
 import {
   ScoreTrendChart,
   AttendanceTrendChart,
@@ -20,7 +20,7 @@ import {
 } from "@/components/home/dashboard-charts"
 import { ComparisonTile } from "@/components/home/comparison-tile"
 import { WeeklyPlanPanel } from "@/components/home/weekly-plan-panel"
-import type { WeeklyPlan } from "@/lib/types"
+import type { HeroChip, WeeklyPlan } from "@/lib/types"
 
 const round1 = (n: number) => Math.round(n * 10) / 10
 
@@ -33,7 +33,7 @@ export default async function Home() {
   }
 
   const supabase = await createClient()
-  const [stats, ranking, plansRes] = await Promise.all([
+  const [stats, ranking, plansRes, chipsRes] = await Promise.all([
     buildDashboardStats(profile.id),
     buildRanking(),
     supabase
@@ -41,6 +41,10 @@ export default async function Home() {
       .select("*")
       .order("week_number", { ascending: true })
       .order("section_number", { ascending: true }),
+    supabase
+      .from("hero_chips")
+      .select("*")
+      .order("created_at", { ascending: true }),
   ])
 
   const scoreData: WeeklyChartPoint[] = stats.scoreTrend.map((p) => ({
@@ -67,21 +71,21 @@ export default async function Home() {
       : 0
 
   const plans = (plansRes.data ?? []) as WeeklyPlan[]
+  const heroChips = (chipsRes.data ?? []) as HeroChip[]
   const isAdmin = profile.role === "admin"
 
   return (
-    <main className="flex-1">
-      <Container className="flex flex-col gap-4 pt-28 pb-12 md:pt-32">
-        <PageHeader
-          eyebrow="DASHBOARD"
-          title="메인"
-          description={`${profile.display_name}님, 오늘도 좋은 하루 보내세요.`}
-        />
-      </Container>
+    /* 풀페이지 스냅 스크롤 — 각 섹션이 화면 하나를 차지하고 페이지처럼 전환된다.
+       스크롤은 이 컨테이너 안에서만 일어나며 스크롤바는 감춘다. */
+    <main className="h-dvh snap-y snap-mandatory overflow-y-scroll scrollbar-hidden">
+      {/* 1페이지 — 물리 인터랙션 히어로 */}
+      <section className="h-dvh snap-start">
+        <GravityHero initialChips={heroChips} isAdmin={isAdmin} />
+      </section>
 
-      {/* 통계 3종 — 하나의 라벤더 밴드로 아래 주차 계획 표와 리듬을 구분 (연속 컬러 밴드 금지). */}
-      <section className="bg-band-lavender py-16 md:py-20">
-        <Container className="flex flex-col gap-8">
+      {/* 2페이지 — 통계 (라벤더 밴드). 화면보다 길어지면 섹션 안에서만 스크롤. */}
+      <section className="h-dvh snap-start overflow-y-auto scrollbar-hidden bg-band-lavender">
+        <Container className="flex min-h-full flex-col justify-center gap-8 py-24">
           <h2 className="text-xl">통계</h2>
           <div className="grid gap-6 lg:grid-cols-2">
             <Card>
@@ -151,18 +155,20 @@ export default async function Home() {
         </Container>
       </section>
 
-      {/* 주차별 계획 표 — 라벤더 밴드 다음이므로 흰 배경으로 되돌아온다. */}
-      <Container className="flex flex-col gap-6 py-16 md:py-20">
-        <h2 className="text-xl">주차별 계획</h2>
-        {plans.length === 0 ? (
-          <EmptyState
-            title="등록된 주차별 계획이 없습니다"
-            description="관리자가 커리큘럼을 등록하면 이곳에 표시됩니다."
-          />
-        ) : (
-          <WeeklyPlanPanel initialPlans={plans} isAdmin={isAdmin} />
-        )}
-      </Container>
+      {/* 3페이지 — 주차별 계획 (흰 배경). 표가 길면 섹션 안에서만 스크롤. */}
+      <section className="h-dvh snap-start overflow-y-auto scrollbar-hidden">
+        <Container className="flex min-h-full flex-col gap-6 py-24">
+          <h2 className="text-xl">주차별 계획</h2>
+          {plans.length === 0 ? (
+            <EmptyState
+              title="등록된 주차별 계획이 없습니다"
+              description="관리자가 커리큘럼을 등록하면 이곳에 표시됩니다."
+            />
+          ) : (
+            <WeeklyPlanPanel initialPlans={plans} isAdmin={isAdmin} />
+          )}
+        </Container>
+      </section>
     </main>
   )
 }
