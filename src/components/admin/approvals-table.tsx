@@ -79,7 +79,7 @@ function ApprovalsTable({ initialUsers }: { initialUsers: PendingUser[] }) {
           <TableRow className="hover:bg-transparent">
             <TableHead>이름</TableHead>
             <TableHead>GitHub</TableHead>
-            <TableHead>가입일</TableHead>
+            <TableHead className="text-center">가입일</TableHead>
             <TableHead className="text-right">처리</TableHead>
           </TableRow>
         </TableHeader>
@@ -98,7 +98,7 @@ function ApprovalsTable({ initialUsers }: { initialUsers: PendingUser[] }) {
               <TableCell className="text-muted-foreground">
                 {user.github_username ? `@${user.github_username}` : "—"}
               </TableCell>
-              <TableCell className="text-muted-foreground">
+              <TableCell className="text-center text-muted-foreground">
                 {formatDate(user.created_at)}
               </TableCell>
               <TableCell>

@@ -33,11 +33,11 @@ function RankingTable({
       <Table>
         <TableHeader>
           <TableRow className="hover:bg-transparent">
-            <TableHead className="w-14">순위</TableHead>
+            <TableHead className="w-16 text-center">순위</TableHead>
             <TableHead>이름</TableHead>
-            <TableHead>시험 총점</TableHead>
-            <TableHead>출석률</TableHead>
-            <TableHead>총점</TableHead>
+            <TableHead className="text-center">시험 총점</TableHead>
+            <TableHead className="text-center">출석률</TableHead>
+            <TableHead className="text-center">총점</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -49,7 +49,7 @@ function RankingTable({
                 entry.user_id === viewerId && "bg-band-lavender/60 hover:bg-band-lavender/70",
               )}
             >
-              <TableCell className="font-heading font-bold text-foreground">
+              <TableCell className="text-center font-heading font-bold text-foreground">
                 {entry.rank}
               </TableCell>
               <TableCell>
@@ -85,13 +85,13 @@ function RankingTable({
                   )}
                 </div>
               </TableCell>
-              <TableCell className="text-muted-foreground">
+              <TableCell className="text-center text-muted-foreground">
                 {formatScore(entry.exam_total)}
               </TableCell>
-              <TableCell className="text-muted-foreground">
+              <TableCell className="text-center text-muted-foreground">
                 {formatPercent(entry.attendance_rate)}
               </TableCell>
-              <TableCell className="font-medium text-foreground">
+              <TableCell className="text-center font-medium text-foreground">
                 {formatScore(entry.total_score)}
               </TableCell>
             </TableRow>

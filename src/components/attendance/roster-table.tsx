@@ -70,7 +70,7 @@ function RosterTable({
         <TableHeader>
           <TableRow className="hover:bg-transparent">
             <TableHead>이름</TableHead>
-            <TableHead>상태</TableHead>
+            <TableHead className="text-center">상태</TableHead>
             {isAdmin && <TableHead className="w-10" />}
           </TableRow>
         </TableHeader>
@@ -91,7 +91,7 @@ function RosterTable({
                   </span>
                 </div>
               </TableCell>
-              <TableCell>
+              <TableCell className="text-center">
                 <StatusBadge status={row.status} />
               </TableCell>
               {isAdmin && (
