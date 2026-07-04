@@ -38,11 +38,14 @@ export async function POST(request: Request) {
     );
   }
 
-  // 경로는 서버가 생성 — 사용자 입력이 경로에 그대로 들어가지 않게 정규화
-  const safeName = file.name
-    .replace(/[^\w.\-가-힣]/g, "_")
-    .slice(-100);
-  const filePath = `${crypto.randomUUID()}/${safeName}`;
+  // 경로는 서버가 생성 — Storage 오브젝트 키는 한글 등 비-ASCII를 거부하므로
+  // ASCII만 남기고 정규화한다("Invalid key" 500의 원인). 원본 파일명은
+  // file_name으로 반환해 게시글에 저장하고 다운로드 시 복원한다.
+  const asciiBase = file.name
+    .slice(0, file.name.length - extension.length - 1)
+    .replace(/[^A-Za-z0-9._-]/g, "")
+    .slice(0, 80);
+  const filePath = `${crypto.randomUUID()}/${asciiBase || "file"}.${extension}`;
 
   const admin = createAdminClient();
   const { error: uploadError } = await admin.storage

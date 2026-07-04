@@ -127,6 +127,98 @@ export type Database = {
           },
         ]
       }
+      board_comments: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string
+          id: string
+          post_id: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          content: string
+          created_at?: string
+          id?: string
+          post_id: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          post_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "board_comments_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "board_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "board_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      board_posts: {
+        Row: {
+          author_id: string
+          category: Database["public"]["Enums"]["board_category"]
+          content_markdown: string | null
+          created_at: string
+          file_name: string | null
+          file_path: string | null
+          id: string
+          link_url: string | null
+          title: string
+          updated_at: string
+          week_number: number | null
+        }
+        Insert: {
+          author_id: string
+          category: Database["public"]["Enums"]["board_category"]
+          content_markdown?: string | null
+          created_at?: string
+          file_name?: string | null
+          file_path?: string | null
+          id?: string
+          link_url?: string | null
+          title: string
+          updated_at?: string
+          week_number?: number | null
+        }
+        Update: {
+          author_id?: string
+          category?: Database["public"]["Enums"]["board_category"]
+          content_markdown?: string | null
+          created_at?: string
+          file_name?: string | null
+          file_path?: string | null
+          id?: string
+          link_url?: string | null
+          title?: string
+          updated_at?: string
+          week_number?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "board_posts_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exam_answers: {
         Row: {
           ai_rationale: string | null
@@ -455,6 +547,42 @@ export type Database = {
           },
         ]
       }
+      weekly_plans: {
+        Row: {
+          created_at: string
+          id: string
+          is_completed: boolean
+          lecture_range: string
+          resource_url: string | null
+          section_number: number
+          title: string
+          updated_at: string
+          week_number: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_completed?: boolean
+          lecture_range: string
+          resource_url?: string | null
+          section_number: number
+          title: string
+          updated_at?: string
+          week_number: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_completed?: boolean
+          lecture_range?: string
+          resource_url?: string | null
+          section_number?: number
+          title?: string
+          updated_at?: string
+          week_number?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -465,6 +593,7 @@ export type Database = {
     }
     Enums: {
       attendance_status: "present" | "late" | "absent"
+      board_category: "free" | "material" | "note"
       user_role: "admin" | "member"
       user_status: "pending" | "approved" | "rejected"
     }
@@ -595,6 +724,7 @@ export const Constants = {
   public: {
     Enums: {
       attendance_status: ["present", "late", "absent"],
+      board_category: ["free", "material", "note"],
       user_role: ["admin", "member"],
       user_status: ["pending", "approved", "rejected"],
     },

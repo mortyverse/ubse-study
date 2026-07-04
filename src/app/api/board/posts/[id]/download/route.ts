@@ -18,7 +18,7 @@ export async function GET(
 
   const { data: post } = await admin
     .from("board_posts")
-    .select("id, file_path")
+    .select("id, file_path, file_name")
     .eq("id", id)
     .maybeSingle();
 
@@ -29,9 +29,10 @@ export async function GET(
     return NextResponse.json({ error: "첨부 파일이 없는 글입니다." }, { status: 404 });
   }
 
+  // storage 키는 ASCII로 정규화되어 있으므로, 저장된 원본 파일명으로 다운로드되게 한다
   const { data: signed, error: signError } = await admin.storage
     .from("materials")
-    .createSignedUrl(post.file_path, 60, { download: true });
+    .createSignedUrl(post.file_path, 60, { download: post.file_name ?? true });
 
   if (signError || !signed) {
     return NextResponse.json(

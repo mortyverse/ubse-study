@@ -27,6 +27,7 @@ export async function POST(request: Request) {
     link_url?: unknown;
     week_number?: unknown;
     file_path?: unknown;
+    file_name?: unknown;
   } | null;
 
   const category = body?.category as BoardCategory | undefined;
@@ -96,6 +97,15 @@ export async function POST(request: Request) {
     filePath = body.file_path;
   }
 
+  // 원본 파일명(표시/다운로드용) — 첨부가 있을 때만 의미가 있다
+  let fileName: string | null = null;
+  if (filePath && body?.file_name !== undefined && body.file_name !== null && body.file_name !== "") {
+    if (typeof body.file_name !== "string" || body.file_name.length > 200) {
+      return invalid("file_name은 200자 이내여야 합니다.");
+    }
+    fileName = body.file_name;
+  }
+
   const admin = createAdminClient();
   const { data: post, error: dbError } = await admin
     .from("board_posts")
@@ -107,6 +117,7 @@ export async function POST(request: Request) {
       link_url: linkUrl,
       week_number: weekNumber,
       file_path: filePath,
+      file_name: fileName,
     })
     .select("*")
     .single();

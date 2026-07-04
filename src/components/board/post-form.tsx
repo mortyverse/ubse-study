@@ -42,9 +42,9 @@ type PostFormInitial = {
 
 /**
  * 게시글 작성/수정 공통 폼 — 카테고리별로 필드 구성만 달라진다 (PRD §4.5).
- * 강의자료 수정 시 파일 교체는 API가 지원하지 않아(POST /materials/upload로
- * 새로 올린 뒤 file_path만 PATCH에 연결하는 계약이 없음) 기존 첨부는 읽기전용으로
- * 보여주고, 새 글 작성 때만 업로드를 받는다.
+ * 강의자료 첨부는 작성·수정 모두 지원: /materials/upload로 올린 뒤 발급된
+ * file_path를 POST/PATCH에 연결한다. 수정에서 교체·제거하면 서버가 이전
+ * 파일을 정리한다.
  */
 function PostForm({
   category,
@@ -122,7 +122,9 @@ function PostForm({
           title,
           link_url: linkUrl.trim() || null,
           week_number: weekNumber,
-          ...(mode === "create" ? { category, file_path: filePath } : {}),
+          file_path: filePath,
+          file_name: fileName,
+          ...(mode === "create" ? { category } : {}),
         }
       } else {
         body = {
@@ -218,58 +220,39 @@ function PostForm({
 
             <Field>
               <FieldLabel htmlFor="post-file">첨부 파일</FieldLabel>
-              {mode === "edit" ? (
-                filePath ? (
-                  <div className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground">
-                    <FileTextIcon />
-                    {fileName ?? "첨부 파일"}
-                  </div>
-                ) : (
-                  <FieldDescription>첨부 파일이 없습니다.</FieldDescription>
-                )
+              {filePath ? (
+                <div className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm">
+                  <FileTextIcon className="text-muted-foreground" />
+                  <span className="flex-1 truncate">{fileName ?? "첨부 파일"}</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={removeFile}
+                    aria-label="첨부 파일 제거"
+                  >
+                    <TrashIcon />
+                  </Button>
+                </div>
               ) : (
                 <>
-                  {filePath ? (
-                    <div className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm">
-                      <FileTextIcon className="text-muted-foreground" />
-                      <span className="flex-1 truncate">{fileName}</span>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon-sm"
-                        onClick={removeFile}
-                        aria-label="첨부 파일 제거"
-                      >
-                        <TrashIcon />
-                      </Button>
-                    </div>
-                  ) : (
-                    <>
-                      <Input
-                        id="post-file"
-                        ref={fileInputRef}
-                        type="file"
-                        onChange={handleFileSelect}
-                        disabled={isUploading}
-                      />
-                      {isUploading && (
-                        <FieldDescription className="flex items-center gap-1.5">
-                          <Spinner /> 업로드 중…
-                        </FieldDescription>
-                      )}
-                    </>
+                  <Input
+                    id="post-file"
+                    ref={fileInputRef}
+                    type="file"
+                    onChange={handleFileSelect}
+                    disabled={isUploading}
+                  />
+                  {isUploading && (
+                    <FieldDescription className="flex items-center gap-1.5">
+                      <Spinner /> 업로드 중…
+                    </FieldDescription>
                   )}
-                  <FieldDescription className="flex items-center gap-1">
-                    <UploadIcon /> pdf/pptx/zip/md/이미지 등, 20MB 이하
-                  </FieldDescription>
                 </>
               )}
-              {mode === "edit" && (
-                <FieldDescription>
-                  수정 화면에서는 첨부 파일을 교체할 수 없습니다. 새 파일이 필요하면 새 글로
-                  등록해 주세요.
-                </FieldDescription>
-              )}
+              <FieldDescription className="flex items-center gap-1">
+                <UploadIcon /> pdf/pptx/zip/md/이미지 등, 20MB 이하
+              </FieldDescription>
             </Field>
           </CardContent>
         </Card>

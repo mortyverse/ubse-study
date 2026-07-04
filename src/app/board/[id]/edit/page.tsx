@@ -68,7 +68,7 @@ export default async function EditBoardPostPage({
             link_url: typedPost.link_url,
             week_number: typedPost.week_number,
             file_path: typedPost.file_path,
-            file_name: fileNameFromPath(typedPost.file_path),
+            file_name: typedPost.file_name ?? fileNameFromPath(typedPost.file_path),
           }}
         />
       </Container>

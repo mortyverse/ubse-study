@@ -45,6 +45,8 @@ export async function PATCH(
     content_markdown?: unknown;
     link_url?: unknown;
     week_number?: unknown;
+    file_path?: unknown;
+    file_name?: unknown;
   } | null;
 
   const updates: Record<string, unknown> = {};
@@ -102,6 +104,37 @@ export async function PATCH(
     }
   }
 
+  if (body?.file_path !== undefined) {
+    if (body.file_path === null || body.file_path === "") {
+      updates.file_path = null;
+      updates.file_name = null;
+    } else if (
+      post.category === "material" &&
+      typeof body.file_path === "string" &&
+      body.file_path.length <= 300 &&
+      !body.file_path.includes("..")
+    ) {
+      updates.file_path = body.file_path;
+      // 원본 파일명(표시/다운로드용) — 첨부와 함께 갱신
+      if (body.file_name !== undefined && body.file_name !== null && body.file_name !== "") {
+        if (typeof body.file_name !== "string" || body.file_name.length > 200) {
+          return NextResponse.json(
+            { error: "file_name은 200자 이내여야 합니다." },
+            { status: 400 },
+          );
+        }
+        updates.file_name = body.file_name;
+      } else if (body.file_path !== post.file_path) {
+        updates.file_name = null;
+      }
+    } else {
+      return NextResponse.json(
+        { error: "file_path는 강의자료 업로드로 발급된 경로만 사용할 수 있습니다." },
+        { status: 400 },
+      );
+    }
+  }
+
   if (Object.keys(updates).length === 0) {
     return NextResponse.json({ error: "수정할 내용이 없습니다." }, { status: 400 });
   }
@@ -115,6 +148,16 @@ export async function PATCH(
 
   if (dbError || !updated) {
     return NextResponse.json({ error: "수정에 실패했습니다." }, { status: 500 });
+  }
+
+  // 첨부 교체/제거 시 이전 파일 정리 — 실패해도 수정은 유지 (고아 파일은 무해)
+  const previousPath = post.file_path;
+  if (
+    "file_path" in updates &&
+    previousPath &&
+    updates.file_path !== previousPath
+  ) {
+    await admin.storage.from("materials").remove([previousPath]);
   }
   return NextResponse.json({ post: updated });
 }
