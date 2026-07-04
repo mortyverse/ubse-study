@@ -1,8 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { getSessionProfile } from "@/lib/auth";
-import { getActiveSession } from "@/lib/attendance";
-import { createClient } from "@/lib/supabase/server";
+import { getActiveSession, getRoster } from "@/lib/attendance";
 import { Container } from "@/components/layout/container";
 import { PageHeader } from "@/components/common/page-header";
 import { AttendanceView } from "@/components/attendance/attendance-view";
@@ -35,31 +34,10 @@ export default async function AttendancePage() {
   let roster: RosterRow[] = [];
 
   if (session) {
-    const supabase = await createClient();
-    const [{ data: members }, { data: records }] = await Promise.all([
-      supabase
-        .from("users")
-        .select("id, display_name, avatar_url, github_username")
-        .eq("status", "approved")
-        .order("display_name", { ascending: true }),
-      supabase.from("attendance_records").select("*").eq("session_id", session.id),
-    ]);
-
-    const recordsByUser = new Map((records ?? []).map((r) => [r.user_id, r]));
-
-    roster = (members ?? []).map((member) => {
-      const record = recordsByUser.get(member.id);
-      return {
-        user: member,
-        status: record?.status ?? "absent",
-        checked_at: record?.checked_at ?? null,
-        recordId: record?.id ?? null,
-      };
-    });
-
-    const myRaw = recordsByUser.get(profile.id);
-    myRecord = myRaw
-      ? { id: myRaw.id, status: myRaw.status, checked_at: myRaw.checked_at }
+    roster = await getRoster(session.id);
+    const myRow = roster.find((r) => r.user.id === profile.id);
+    myRecord = myRow?.recordId
+      ? { id: myRow.recordId, status: myRow.status, checked_at: myRow.checked_at }
       : null;
   }
 

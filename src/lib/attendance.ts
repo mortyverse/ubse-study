@@ -1,6 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { AttendanceSession } from "@/lib/types";
+import type { RosterRow } from "@/components/attendance/types";
 
 /**
  * 만료 세션 lazy 종료 — 별도 크론 없이, 출석 관련 API가 호출될 때마다
@@ -33,6 +34,37 @@ export async function getActiveSession(): Promise<
     .limit(1)
     .maybeSingle();
   return (data as (AttendanceSession & { code: string }) | null) ?? null;
+}
+
+/**
+ * 승인 전원 + 해당 세션 레코드를 병합한 로스터. 레코드가 없는 사람은 결석 취급.
+ * 페이지 초기 렌더와 GET /api/attendance/sessions 폴링이 같은 스냅샷을 쓴다.
+ */
+export async function getRoster(sessionId: string): Promise<RosterRow[]> {
+  const admin = createAdminClient();
+  const [{ data: members }, { data: records }] = await Promise.all([
+    admin
+      .from("users")
+      .select("id, display_name, avatar_url, github_username")
+      .eq("status", "approved")
+      .order("display_name", { ascending: true }),
+    admin
+      .from("attendance_records")
+      .select("id, user_id, status, checked_at")
+      .eq("session_id", sessionId),
+  ]);
+
+  const recordsByUser = new Map((records ?? []).map((r) => [r.user_id, r]));
+
+  return (members ?? []).map((member) => {
+    const record = recordsByUser.get(member.id);
+    return {
+      user: member,
+      status: record?.status ?? "absent",
+      checked_at: record?.checked_at ?? null,
+      recordId: record?.id ?? null,
+    };
+  });
 }
 
 /** 암호학적 난수 기반 4자리 코드 */

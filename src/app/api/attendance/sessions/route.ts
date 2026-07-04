@@ -5,6 +5,7 @@ import {
   closeExpiredSessions,
   generateAttendanceCode,
   getActiveSession,
+  getRoster,
 } from "@/lib/attendance";
 
 /**
@@ -122,18 +123,16 @@ export async function GET() {
   await closeExpiredSessions();
   const session = await getActiveSession();
   if (!session) {
-    return NextResponse.json({ session: null, myRecord: null });
+    return NextResponse.json({ session: null, myRecord: null, roster: [] });
   }
 
-  const admin = createAdminClient();
-  const { data: myRecord } = await admin
-    .from("attendance_records")
-    .select("id, status, checked_at")
-    .eq("session_id", session.id)
-    .eq("user_id", profile.id)
-    .maybeSingle();
+  const roster = await getRoster(session.id);
+  const myRow = roster.find((r) => r.user.id === profile.id);
+  const myRecord = myRow?.recordId
+    ? { id: myRow.recordId, status: myRow.status, checked_at: myRow.checked_at }
+    : null;
 
   // code 필드 제거 후 반환
   const { code: _code, ...safeSession } = session;
-  return NextResponse.json({ session: safeSession, myRecord });
+  return NextResponse.json({ session: safeSession, myRecord, roster });
 }
