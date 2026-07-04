@@ -26,6 +26,11 @@ Read `@docs/PRD.md` (§4 has the table definitions per feature; §2.1 the DB wor
   -- for sequences/functions the API touches, GRANT USAGE/EXECUTE similarly
   ```
   Grant only the privileges a role actually needs (e.g. read-only tables get `SELECT` only). RLS still gates the rows; GRANT gates whether the API can see the table at all. Forgetting the GRANT is the #1 "supabase-js returns empty / permission denied" bug — never skip it.
+- **`service_role` needs explicit grants too** (learned the hard way in 0004): "expose new tables OFF" strips the default privileges of `service_role` as well, and service_role bypasses RLS but NOT grants. Every server-side write path in this app uses the service-role client, so every new table MUST also get:
+  ```sql
+  GRANT SELECT, INSERT, UPDATE, DELETE ON public.<table> TO service_role;
+  ```
+  Omitting this makes every API route that touches the table fail with "permission denied for table <table>" even though RLS/policies are perfect.
 - After applying, run `list_tables` / a read-only `execute_sql` to confirm the result matches intent, and summarize what changed.
 
 ## Handoff
