@@ -1,0 +1,192 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains-mono);
+  --font-heading: var(--font-hanken-grotesk);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-6: var(--chart-6);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-band-peach: var(--band-peach);
+  --color-band-peach-light: var(--band-peach-light);
+  --color-band-lavender: var(--band-lavender);
+  --color-band-pink: var(--band-pink);
+  --color-spark: var(--spark);
+  --color-terracotta: var(--terracotta);
+  --color-slate-accent: var(--slate-accent);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-status-present: var(--status-present);
+  --color-status-late: var(--status-late);
+  --color-status-absent: var(--status-absent);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/*
+ * 디자인 헌법 팔레트 (CLAUDE.md "Design system" 참조)
+ * 화이트 캔버스 + 플럼 잉크(#29273A) + 뮤트 바이올렛 primary(#7365A6).
+ * 컴포넌트에서 팔레트 밖 raw 색상 하드코딩 금지 — 필요하면 여기 토큰을 확장한다.
+ */
+:root {
+  --background: #ffffff;
+  --foreground: #29273a; /* plum ink */
+  --card: #ffffff;
+  --card-foreground: #29273a;
+  --popover: #ffffff;
+  --popover-foreground: #29273a;
+  --primary: #7365a6; /* muted violet ★ — 화면당 primary 버튼 1개 */
+  --primary-hover: #5e5190; /* deep violet */
+  --primary-foreground: #ffffff;
+  --secondary: #f6f5f9; /* faint lavender (secondary hover 면) */
+  --secondary-foreground: #29273a;
+  --muted: #f6f5f9;
+  --muted-foreground: #55566b; /* readable slate — 보조 텍스트 */
+  --accent: #edeaf5; /* lavender tint — ghost/menu hover */
+  --accent-foreground: #29273a;
+  --destructive: #c7495a; /* rose */
+  --border: #e6e4ec; /* lavender hairline */
+  --input: #e6e4ec;
+  --ring: rgba(115, 101, 166, 0.45);
+  /* 카테고리/데이터 액센트 — 이 순서대로만 사용 */
+  --chart-1: #7365a6; /* violet (본인 데이터) */
+  --chart-2: #f5b0f0; /* pink spark — 장식/하이라이트 전용, 텍스트 금지 */
+  --chart-3: #bf8d7a; /* terracotta ★ */
+  --chart-4: #6d6f8c; /* slate ★ (전체 평균) */
+  --chart-5: #4e9e81; /* sage green */
+  --chart-6: #d9a441; /* amber */
+  /* 섹션 컬러 밴드 — 컬러 밴드 2개 연속 배치 금지 */
+  --band-peach: #f2ccb6; /* peach ★ (히어로/푸터 앵커) */
+  --band-peach-light: #f7dfcb;
+  --band-lavender: #edeaf5;
+  --band-pink: #fbe3f7;
+  --spark: #f5b0f0; /* pink ★ — 로고/포커스 글로우/장식 전용, 텍스트 금지 */
+  --terracotta: #bf8d7a;
+  --slate-accent: #6d6f8c;
+  /* 시맨틱 상태 */
+  --success: #4e9e81;
+  --warning: #d9a441;
+  --status-present: #4e9e81; /* 출석 */
+  --status-late: #bf8d7a; /* 지각 */
+  --status-absent: #6d6f8c; /* 결석 (기본값) */
+  --radius: 0.5rem; /* 8px house radius */
+  --sidebar: #ffffff;
+  --sidebar-foreground: #29273a;
+  --sidebar-primary: #7365a6;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #edeaf5;
+  --sidebar-accent-foreground: #29273a;
+  --sidebar-border: #e6e4ec;
+  --sidebar-ring: rgba(115, 101, 166, 0.45);
+}
+
+/* 다크 모드 (선택 — light 우선 출시). 웜 바이올렛 유지, 차가운 slate 금지 */
+.dark {
+  --background: #1e1c2a; /* dark plum */
+  --foreground: #f1ecf5;
+  --card: #272537;
+  --card-foreground: #f1ecf5;
+  --popover: #272537;
+  --popover-foreground: #f1ecf5;
+  --primary: #9b8fcb; /* 대비 확보용으로 밝힌 violet */
+  --primary-hover: #ab9fd9;
+  --primary-foreground: #1e1c2a;
+  --secondary: #322f45;
+  --secondary-foreground: #f1ecf5;
+  --muted: #322f45;
+  --muted-foreground: #a9a5bd;
+  --accent: #322f45;
+  --accent-foreground: #f1ecf5;
+  --destructive: #d96a79;
+  --border: #3a3752;
+  --input: #3a3752;
+  --ring: rgba(155, 143, 203, 0.45);
+  --chart-1: #9b8fcb;
+  --chart-2: #f5b0f0; /* spark pink 유지 */
+  --chart-3: #cfa08c;
+  --chart-4: #8b8daa;
+  --chart-5: #63b394;
+  --chart-6: #e0b055;
+  --band-peach: #3a3145;
+  --band-peach-light: #342c3e;
+  --band-lavender: #2d2a40;
+  --band-pink: #362b3f;
+  --spark: #f5b0f0;
+  --terracotta: #cfa08c;
+  --slate-accent: #8b8daa;
+  --success: #63b394;
+  --warning: #e0b055;
+  --status-present: #63b394;
+  --status-late: #cfa08c;
+  --status-absent: #8b8daa;
+  --sidebar: #272537;
+  --sidebar-foreground: #f1ecf5;
+  --sidebar-primary: #9b8fcb;
+  --sidebar-primary-foreground: #1e1c2a;
+  --sidebar-accent: #322f45;
+  --sidebar-accent-foreground: #f1ecf5;
+  --sidebar-border: #3a3752;
+  --sidebar-ring: rgba(155, 143, 203, 0.45);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    letter-spacing: -0.01em; /* Inter body 미세 네거티브 트래킹 */
+  }
+  html {
+    @apply font-sans;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+}
