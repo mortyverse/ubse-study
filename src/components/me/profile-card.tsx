@@ -3,6 +3,7 @@
 import * as React from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import { uploadViaSignedUrl } from "@/lib/storage-upload"
 import { CameraIcon, Pencil1Icon } from "@radix-ui/react-icons"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -41,9 +42,17 @@ function ProfileCard({
     if (!file) return
     setIsUploading(true)
     try {
-      const formData = new FormData()
-      formData.append("file", file)
-      const res = await fetch("/api/me/avatar", { method: "POST", body: formData })
+      // 1) 토큰 발급 + Storage 직접 업로드, 2) avatar_url 확정 (PATCH)
+      const result = await uploadViaSignedUrl("/api/me/avatar", file)
+      if (!result.ok) {
+        toast.error(result.error)
+        return
+      }
+      const res = await fetch("/api/me/avatar", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ file_path: result.file_path }),
+      })
       const data = await res.json()
       if (!res.ok) {
         toast.error(data.error ?? "사진 업로드에 실패했습니다.")

@@ -3,6 +3,7 @@
 import * as React from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import { uploadViaSignedUrl } from "@/lib/storage-upload"
 import {
   CameraIcon,
   FileTextIcon,
@@ -97,22 +98,14 @@ function PostForm({
     if (!file) return
     setIsUploading(true)
     try {
-      const formData = new FormData()
-      formData.append("file", file)
-      const res = await fetch("/api/board/materials/upload", {
-        method: "POST",
-        body: formData,
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        toast.error(data.error ?? "파일 업로드에 실패했습니다.")
+      const result = await uploadViaSignedUrl("/api/board/materials/upload", file)
+      if (!result.ok) {
+        toast.error(result.error)
         return
       }
-      setFilePath(data.file_path)
-      setFileName(data.file_name)
+      setFilePath(result.file_path)
+      setFileName(result.file_name)
       toast.success("파일을 업로드했습니다.")
-    } catch {
-      toast.error("네트워크 오류가 발생했습니다.")
     } finally {
       setIsUploading(false)
       if (fileInputRef.current) fileInputRef.current.value = ""
@@ -283,7 +276,7 @@ function PostForm({
                 </>
               )}
               <FieldDescription className="flex items-center gap-1">
-                <UploadIcon /> pdf/pptx/zip/md/이미지 등, 20MB 이하
+                <UploadIcon /> pdf/pptx/zip/md/이미지 등, 50MB 이하
               </FieldDescription>
             </Field>
           </CardContent>

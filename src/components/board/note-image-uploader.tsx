@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { toast } from "sonner"
+import { uploadViaSignedUrl } from "@/lib/storage-upload"
 import { CameraIcon, Cross2Icon, PlusIcon } from "@radix-ui/react-icons"
 
 import { Spinner } from "@/components/ui/spinner"
@@ -58,18 +59,12 @@ function NoteImageUploader({
       const uploaded: NoteImage[] = []
       // 순서 보존을 위해 선택한 순서대로 하나씩 올린다.
       for (const file of files) {
-        const formData = new FormData()
-        formData.append("file", file)
-        const res = await fetch("/api/board/notes/upload", {
-          method: "POST",
-          body: formData,
-        })
-        const data = await res.json()
-        if (!res.ok) {
-          toast.error(data.error ?? `${file.name} 업로드에 실패했습니다.`)
+        const result = await uploadViaSignedUrl("/api/board/notes/upload", file)
+        if (!result.ok) {
+          toast.error(`${file.name}: ${result.error}`)
           continue
         }
-        uploaded.push({ path: data.file_path, url: URL.createObjectURL(file) })
+        uploaded.push({ path: result.file_path, url: URL.createObjectURL(file) })
       }
       if (uploaded.length > 0) {
         onChange([...images, ...uploaded])
