@@ -1,9 +1,10 @@
 import { getSessionProfile } from "@/lib/auth"
 import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 import { buildGroupTrends, type GroupTrendPoint } from "@/lib/stats"
 import { Container } from "@/components/layout/container"
 import { EmptyState } from "@/components/common/empty-state"
-import { LandingHero } from "@/components/home/landing-hero"
+import { LockedSection } from "@/components/home/locked-section"
 import { GravityHero } from "@/components/home/gravity-hero"
 import { StatsSlider, type GroupChartRow } from "@/components/home/stats-slider"
 import { WeeklyPlanPanel } from "@/components/home/weekly-plan-panel"
@@ -21,9 +22,33 @@ function toChartRows(points: GroupTrendPoint[]): GroupChartRow[] {
 export default async function Home() {
   const { profile } = await getSessionProfile()
 
-  // 로그아웃/미승인 방문자 — 기존 마케팅 히어로 그대로 (PRD §4.7 대상 아님).
+  // 로그아웃/미승인 방문자 — 같은 3섹션 구조를 유지하되, 히어로에 "시작하기"
+  // CTA를 얹고 통계/주차별 계획은 잠금 처리한다. 중력 블록(hero_chips)은
+  // 관리자가 고르는 장식 요소라 admin 클라이언트로 읽어 방문자에게도 보여준다
+  // (데이터 노출 아님 — 통계·계획 등 실데이터는 여전히 잠긴다).
   if (!profile || profile.status !== "approved") {
-    return <LandingHero />
+    const { data: publicChips } = await createAdminClient()
+      .from("hero_chips")
+      .select("*")
+      .order("created_at", { ascending: true })
+
+    return (
+      <main className="h-dvh snap-y snap-mandatory overflow-y-scroll scrollbar-hidden">
+        <section className="h-dvh snap-start">
+          <GravityHero
+            initialChips={(publicChips ?? []) as HeroChip[]}
+            isAdmin={false}
+            showLoginCta
+          />
+        </section>
+        <section className="h-dvh snap-start overflow-y-auto scrollbar-hidden">
+          <LockedSection title="통계" />
+        </section>
+        <section className="h-dvh snap-start overflow-y-auto scrollbar-hidden">
+          <LockedSection title="주차별 계획" />
+        </section>
+      </main>
+    )
   }
 
   const supabase = await createClient()

@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 import { toast } from "sonner"
 import { ArrowDownIcon, Cross2Icon, PlusIcon } from "@radix-ui/react-icons"
 
@@ -220,9 +221,12 @@ function AddChipDialog({
 function GravityHero({
   initialChips,
   isAdmin,
+  showLoginCta = false,
 }: {
   initialChips: HeroChip[]
   isAdmin: boolean
+  /** 로그아웃 방문자용 — 타이틀 아래 "시작하기" CTA를 노출한다 */
+  showLoginCta?: boolean
 }) {
   const [chips, setChips] = React.useState(initialChips)
   const [dialogOpen, setDialogOpen] = React.useState(false)
@@ -255,6 +259,13 @@ function GravityHero({
           <ClaudeSpark className="size-[0.85em] shrink-0" />
           Claude Code for developer
         </h1>
+        {showLoginCta && (
+          <div className="pointer-events-auto pt-4">
+            <Button asChild size="lg">
+              <Link href="/auth/login">시작하기</Link>
+            </Button>
+          </div>
+        )}
       </div>
 
       <Gravity gravity={{ x: 0, y: 1 }} className="h-full w-full">
@@ -268,20 +279,24 @@ function GravityHero({
         ))}
       </Gravity>
 
-      <Button
-        variant="outline"
-        size="icon"
-        aria-label="블록 추가"
-        onClick={() => setDialogOpen(true)}
-        className="absolute right-8 bottom-8 z-10 rounded-full shadow-sm"
-      >
-        <PlusIcon className="size-5" />
-      </Button>
-      <AddChipDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        onAdded={handleAdded}
-      />
+      {isAdmin && (
+        <>
+          <Button
+            variant="outline"
+            size="icon"
+            aria-label="블록 추가"
+            onClick={() => setDialogOpen(true)}
+            className="absolute right-8 bottom-8 z-10 rounded-full shadow-sm"
+          >
+            <PlusIcon className="size-5" />
+          </Button>
+          <AddChipDialog
+            open={dialogOpen}
+            onOpenChange={setDialogOpen}
+            onAdded={handleAdded}
+          />
+        </>
+      )}
 
       <div className="pointer-events-none absolute inset-x-0 bottom-8 z-10 flex flex-col items-center gap-1.5 text-foreground">
         <span className="text-[11px] font-semibold tracking-[0.25em]">SCROLL</span>
