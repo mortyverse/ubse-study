@@ -221,10 +221,14 @@ function AddChipDialog({
 function GravityHero({
   initialChips,
   isAdmin,
+  canAdd = false,
   showLoginCta = false,
 }: {
   initialChips: HeroChip[]
+  /** 삭제(X 버튼)는 admin 전용 */
   isAdmin: boolean
+  /** 블록 추가는 승인 멤버 누구나 — 방문자 화면에서는 끈다 */
+  canAdd?: boolean
   /** 로그아웃 방문자용 — 타이틀 아래 "시작하기" CTA를 노출한다 */
   showLoginCta?: boolean
 }) {
@@ -279,7 +283,7 @@ function GravityHero({
         ))}
       </Gravity>
 
-      {isAdmin && (
+      {canAdd && (
         <>
           <Button
             variant="outline"

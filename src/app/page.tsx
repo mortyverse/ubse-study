@@ -24,12 +24,12 @@ export default async function Home() {
 
   // 로그아웃/미승인 방문자 — 같은 3섹션 구조를 유지하되, 히어로에 "시작하기"
   // CTA를 얹고 통계/주차별 계획은 잠금 처리한다. 중력 블록(hero_chips)은
-  // 관리자가 고르는 장식 요소라 admin 클라이언트로 읽어 방문자에게도 보여준다
-  // (데이터 노출 아님 — 통계·계획 등 실데이터는 여전히 잠긴다).
+  // 멤버들이 꾸미는 장식 요소라 admin 클라이언트로 읽어 방문자에게도 보여준다
+  // (데이터 노출 아님 — created_by는 select에서 제외, 실데이터는 여전히 잠긴다).
   if (!profile || profile.status !== "approved") {
     const { data: publicChips } = await createAdminClient()
       .from("hero_chips")
-      .select("*")
+      .select("id, label, color, created_at")
       .order("created_at", { ascending: true })
 
     return (
@@ -59,9 +59,10 @@ export default async function Home() {
       .select("*")
       .order("week_number", { ascending: true })
       .order("section_number", { ascending: true }),
+    // created_by는 컬럼 GRANT에서 제외돼 있어 select("*")는 실패한다 — 명시 목록 필수
     supabase
       .from("hero_chips")
-      .select("*")
+      .select("id, label, color, created_at")
       .order("created_at", { ascending: true }),
     supabase
       .from("plan_lectures")
@@ -80,7 +81,7 @@ export default async function Home() {
     <main className="h-dvh snap-y snap-mandatory overflow-y-scroll scrollbar-hidden">
       {/* 1페이지 — 물리 인터랙션 히어로 */}
       <section className="h-dvh snap-start">
-        <GravityHero initialChips={heroChips} isAdmin={isAdmin} />
+        <GravityHero initialChips={heroChips} isAdmin={isAdmin} canAdd />
       </section>
 
       {/* 2페이지 — 통계 슬라이더 (점수 추이 ↔ 출석률 추이, 멤버 전원 표시) */}

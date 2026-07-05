@@ -165,11 +165,11 @@ export type HeroChipColor =
   | "peach"
   | "pink";
 
+// created_by는 의도적으로 제외 — 추가자 추적은 관리자가 DB에서 SQL로만 조회한다
 export interface HeroChip {
   id: string;
   label: string;
   color: HeroChipColor;
-  created_by: string | null;
   created_at: string;
 }
 

@@ -49,7 +49,7 @@ export async function POST(request: Request) {
   const { data: chip, error: dbError } = await admin
     .from("hero_chips")
     .insert({ label, color, created_by: profile.id })
-    .select("*")
+    .select("id, label, color, created_at")
     .single();
 
   if (dbError || !chip) {
