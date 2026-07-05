@@ -128,11 +128,13 @@
 
 ---
 
-## Phase 5 — 배포 & 운영 (Deploy)
-- [ ] 전체 반응형/접근성 최종 점검 (모바일 출석 포함)
-- [ ] `rls-security-auditor` 전체 최종 감사 (모든 테이블 RLS + API)
-- [ ] **[직접]** prod GitHub OAuth App 생성 + Supabase prod GitHub provider 설정 (prod callback URL)
-- [ ] **[직접]** 검증된 dev 마이그레이션을 `study-site-prod`에 적용 (dev→prod 승격 절차, 대시보드/CLI 수동)
-- [ ] **[직접]** Vercel 프로젝트 생성 + 저장소 연결 + 환경변수(prod URL/키/Gemini) 입력
-- [ ] **[직접]** prod 최초 로그인 후 본인 계정을 admin 승격 (single-admin)
-- [ ] 배포 후 스모크 테스트 (로그인→승인→출석→시험→랭킹→게시판 e2e 흐름)
+## Phase 5 — 배포 & 운영 (Deploy) — ✅ 완료 (2026-07-05)
+- [x] 전체 반응형/접근성 최종 점검 (모바일 출석 포함)
+- [x] `rls-security-auditor` 전체 최종 감사 (모든 테이블 RLS + API) — 클린 (0건, 참고 1건: hero_chips 공개 랜딩 노출은 의도)
+- [x] **[직접]** prod GitHub OAuth App 생성 + Supabase prod GitHub provider 설정 (prod callback URL)
+- [x] **[직접]** 검증된 dev 마이그레이션을 `study-site-prod`에 적용 — 0001~0016 순서 적용, 테이블 15개/시드/버킷 3종 dev와 일치 확인
+- [x] **[직접]** Vercel 프로젝트 생성 + 저장소 연결 + 환경변수(prod URL/키/Gemini) 입력 — https://ubse-study.vercel.app
+- [x] **[직접]** prod 최초 로그인 후 본인 계정을 admin 승격 (single-admin)
+- [x] 배포 후 스모크 테스트 (로그인→승인→출석→시험(AI 채점)→랭킹→게시판·업로드→프로필→다크모드 e2e) — 전 항목 통과, 테스트 데이터 정리 완료 (admin 1명 + 커리큘럼 시드만 유지)
+
+**운영 배포 완료.** 이후 변경 워크플로: dev에서 개발·검증 → 새 마이그레이션은 prod SQL Editor에 번호순 수동 적용 → `git push`로 Vercel 자동 배포.
