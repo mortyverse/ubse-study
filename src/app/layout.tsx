@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Hanken_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { SiteNav, type NavUser } from "@/components/layout/site-nav";
+import { ThemeProvider } from "@/components/layout/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { getSessionProfile } from "@/lib/auth";
 
@@ -21,7 +22,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Study",
+  title: "UbSE-Study",
   description: "UbSE 스터디 운영 사이트 — 출석, 시험, 게시판, 랭킹",
 };
 
@@ -44,11 +45,14 @@ export default async function RootLayout({
     <html
       lang="ko"
       className={`${hankenGrotesk.variable} ${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
-        <SiteNav user={navUser} />
-        {children}
-        <Toaster />
+        <ThemeProvider>
+          <SiteNav user={navUser} />
+          {children}
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );

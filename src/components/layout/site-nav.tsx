@@ -7,6 +7,7 @@ import { HamburgerMenuIcon } from "@radix-ui/react-icons"
 
 import { cn } from "@/lib/utils"
 import { Container } from "@/components/layout/container"
+import { ThemeToggle } from "@/components/layout/theme-toggle"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import {
@@ -139,6 +140,7 @@ function SiteNav({ user = null }: { user?: NavUser }) {
         <div className="hidden items-center gap-8 md:flex">
           <NavLinks pathname={pathname} />
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             {showAdminLink && (
               <Button asChild variant="outline">
                 <Link href="/admin">관리자 메뉴</Link>
@@ -154,12 +156,13 @@ function SiteNav({ user = null }: { user?: NavUser }) {
           </div>
         </div>
 
+        <div className="flex items-center gap-1 md:hidden">
+          <ThemeToggle />
         <Sheet>
           <SheetTrigger asChild>
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden"
               aria-label="메뉴 열기"
             >
               <HamburgerMenuIcon className="size-5" />
@@ -212,6 +215,7 @@ function SiteNav({ user = null }: { user?: NavUser }) {
             </div>
           </SheetContent>
         </Sheet>
+        </div>
       </Container>
     </header>
   )
