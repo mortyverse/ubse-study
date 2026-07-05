@@ -54,13 +54,18 @@ function RankingTable({
               </TableCell>
               <TableCell>
                 <div className="flex items-center gap-3">
-                  <Avatar size="sm">
-                    <AvatarImage src={entry.avatar_url ?? undefined} alt={entry.display_name} />
-                    <AvatarFallback>{entry.display_name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <span className="font-medium text-foreground">{entry.display_name}</span>
+                  <Link
+                    href={entry.user_id === viewerId ? "/me" : `/members/${entry.user_id}`}
+                    className="flex items-center gap-3 font-medium text-foreground underline-offset-4 hover:text-primary hover:underline"
+                  >
+                    <Avatar size="sm">
+                      <AvatarImage src={entry.avatar_url ?? undefined} alt={entry.display_name} />
+                      <AvatarFallback>{entry.display_name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    {entry.display_name}
+                  </Link>
                   {(entry.github_url || entry.project_url) && (
-                    <span className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-2 text-sm text-muted-foreground">
                       {entry.github_url && (
                         <Link
                           href={entry.github_url}
