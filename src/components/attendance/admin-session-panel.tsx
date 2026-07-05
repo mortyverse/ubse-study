@@ -134,7 +134,7 @@ function AdminSessionPanel({
       </CardHeader>
       <CardContent className="flex flex-wrap items-end gap-4">
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-muted-foreground">주차</label>
+          <label className="text-sm font-medium text-muted-foreground">주차</label>
           <Select value={week} onValueChange={setWeek}>
             <SelectTrigger className="w-28">
               <SelectValue />
@@ -149,7 +149,7 @@ function AdminSessionPanel({
           </Select>
         </div>
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-muted-foreground">시간</label>
+          <label className="text-sm font-medium text-muted-foreground">시간</label>
           <Select value={duration} onValueChange={setDuration}>
             <SelectTrigger className="w-28">
               <SelectValue />

@@ -57,14 +57,14 @@ function AnswerRow({ answerId, answer }: { answerId: string; answer: AdminSubmis
     <div className="flex flex-col gap-2 border-b border-border py-3 last:border-b-0">
       <div className="flex items-baseline justify-between gap-3">
         <span className="text-sm font-medium text-foreground">{answer.question_text}</span>
-        <span className="shrink-0 text-xs text-muted-foreground">배점 {answer.max_score}점</span>
+        <span className="shrink-0 text-sm text-muted-foreground">배점 {answer.max_score}점</span>
       </div>
       <p className="rounded-lg border border-border bg-muted/40 p-2.5 text-sm whitespace-pre-wrap text-foreground">
         {answer.answer_text || (
           <span className="text-muted-foreground">제출된 답안이 없습니다.</span>
         )}
       </p>
-      <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+      <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
         <Badge variant="outline">AI 초안 {answer.ai_score ?? "—"}</Badge>
         {answer.final_score !== null && (
           <Badge>
@@ -81,7 +81,7 @@ function AnswerRow({ answerId, answer }: { answerId: string; answer: AdminSubmis
         )}
       </div>
       {answer.ai_rationale && (
-        <p className="rounded-lg bg-band-lavender p-2.5 text-xs text-muted-foreground">
+        <p className="rounded-lg bg-band-lavender p-2.5 text-sm text-muted-foreground">
           {answer.ai_rationale}
         </p>
       )}

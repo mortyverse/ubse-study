@@ -242,7 +242,7 @@ function TakeExamView({ examId }: { examId: string }) {
             {data.exam.week_number}주차 · {data.exam.title}
           </span>
           {lastSavedAt && (
-            <span className="text-xs text-muted-foreground">
+            <span className="text-sm text-muted-foreground">
               저장됨 {formatClock(lastSavedAt)}
             </span>
           )}
@@ -265,7 +265,7 @@ function TakeExamView({ examId }: { examId: string }) {
                 <span>
                   {i + 1}. {q.question_text}
                 </span>
-                <span className="shrink-0 text-xs font-normal text-muted-foreground">
+                <span className="shrink-0 text-sm font-normal text-muted-foreground">
                   배점 {q.max_score}점
                 </span>
               </CardTitle>

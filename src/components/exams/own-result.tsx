@@ -125,7 +125,7 @@ function OwnResult({ result }: { result: MyResultView }) {
                     <span>
                       {i + 1}. {a.question_text}
                     </span>
-                    <span className="shrink-0 text-xs font-normal text-muted-foreground">
+                    <span className="shrink-0 text-sm font-normal text-muted-foreground">
                       배점 {a.max_score}점
                     </span>
                   </CardTitle>
@@ -190,7 +190,7 @@ function OwnResult({ result }: { result: MyResultView }) {
                         </Button>
                       )}
                       {a.hasOpenDispute && (
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-sm text-muted-foreground">
                           이의제기가 진행 중입니다 — 아래 토론에서 확인하세요.
                         </p>
                       )}

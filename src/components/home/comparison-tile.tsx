@@ -41,13 +41,13 @@ function ComparisonTile({
           <span className="font-heading text-3xl font-bold text-primary">
             {formatValue(mineValue)}
           </span>
-          <span className="text-xs text-muted-foreground">내 값</span>
+          <span className="text-sm text-muted-foreground">내 값</span>
         </div>
         <div className="flex flex-col gap-1">
           <span className="font-heading text-xl font-bold text-slate-accent">
             {formatValue(averageValue)}
           </span>
-          <span className="text-xs text-muted-foreground">전체 평균</span>
+          <span className="text-sm text-muted-foreground">전체 평균</span>
         </div>
       </div>
 

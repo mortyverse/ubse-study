@@ -62,7 +62,7 @@ function NavLinks({
           href={link.href}
           aria-current={isActive(pathname, link.href) ? "page" : undefined}
           className={cn(
-            "text-sm font-normal tracking-[-0.01em] text-foreground transition-colors hover:text-primary",
+            "text-base font-medium tracking-[-0.01em] text-foreground transition-colors hover:text-primary",
             isActive(pathname, link.href) && "text-primary"
           )}
         >
@@ -131,7 +131,7 @@ function SiteNav({ user = null }: { user?: NavUser }) {
       <Container className="flex h-full items-center justify-between">
         <Link
           href="/"
-          className="font-heading text-xl font-extrabold tracking-[-0.03em] text-foreground"
+          className="font-heading text-2xl font-extrabold tracking-[-0.03em] text-foreground"
         >
           Study
         </Link>
@@ -173,7 +173,7 @@ function SiteNav({ user = null }: { user?: NavUser }) {
               <SheetClose asChild>
                 <NavLinks
                   pathname={pathname}
-                  className="flex-col items-start gap-5"
+                  className="flex-col items-start gap-5 [&>a]:text-lg"
                 />
               </SheetClose>
               <div className="mt-auto flex flex-col gap-3 pb-4">

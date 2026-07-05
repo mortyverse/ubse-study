@@ -82,7 +82,7 @@ export default async function BoardPostDetailPage({
               <div className="flex items-center gap-2">
                 <CategoryBadge category={typedPost.category} />
                 {typedPost.category === "material" && typedPost.week_number && (
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-sm text-muted-foreground">
                     {typedPost.week_number}주차
                   </span>
                 )}
@@ -142,7 +142,7 @@ export default async function BoardPostDetailPage({
                   />
                 </a>
               ))}
-              <p className="text-xs text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 필기 사진 {noteImageUrls.length}장 · 클릭하면 원본 크기로 볼 수 있습니다.
               </p>
             </div>

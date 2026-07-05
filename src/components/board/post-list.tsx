@@ -20,7 +20,7 @@ function formatDate(iso: string) {
 
 function PostMeta({ post }: { post: BoardListPost }) {
   return (
-    <div className="flex shrink-0 items-center gap-2.5 text-xs text-muted-foreground">
+    <div className="flex shrink-0 items-center gap-2.5 text-sm text-muted-foreground">
       {post.users && (
         <span className="flex items-center gap-1.5">
           <Avatar size="sm">
@@ -97,13 +97,13 @@ function PostList({
               {post.title}
             </span>
             {category === "note" && post.image_count > 0 && (
-              <span className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
+              <span className="flex shrink-0 items-center gap-1 text-sm text-muted-foreground">
                 <CameraIcon />
                 {post.image_count}
               </span>
             )}
             {category === "free" && post.comment_count > 0 && (
-              <span className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
+              <span className="flex shrink-0 items-center gap-1 text-sm text-muted-foreground">
                 <ChatBubbleIcon />
                 {post.comment_count}
               </span>

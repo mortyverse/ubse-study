@@ -136,7 +136,7 @@ function NoteImageUploader({
               ? "업로드 중…"
               : "공책 필기 사진을 끌어다 놓거나, 클릭해서 선택하세요"}
           </span>
-          <span className="text-xs text-muted-foreground">
+          <span className="text-sm text-muted-foreground">
             jpg · png · webp · gif — 장당 10MB, 최대 {MAX_IMAGES}장
           </span>
         </button>
@@ -184,13 +184,13 @@ function NoteImageUploader({
                 }`}
               >
                 {isUploading ? <Spinner className="size-5" /> : <PlusIcon className="size-5" />}
-                <span className="text-xs font-medium">
+                <span className="text-sm font-medium">
                   {isUploading ? "업로드 중…" : "사진 추가"}
                 </span>
               </button>
             )}
           </div>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             {images.length}/{MAX_IMAGES}장 · 번호 순서대로 노트에 표시됩니다.
           </p>
         </>

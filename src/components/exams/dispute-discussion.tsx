@@ -129,7 +129,7 @@ function DisputeCard({ dispute }: { dispute: DisputeView }) {
 
         <div className="flex flex-col gap-3 border-t border-border pt-3">
           {dispute.comments.length === 0 ? (
-            <p className="text-xs text-muted-foreground">아직 댓글이 없습니다.</p>
+            <p className="text-sm text-muted-foreground">아직 댓글이 없습니다.</p>
           ) : (
             dispute.comments.map((c) => (
               <div key={c.id} className="flex items-start gap-2.5">
@@ -138,7 +138,7 @@ function DisputeCard({ dispute }: { dispute: DisputeView }) {
                   <AvatarFallback>{c.author.display_name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-xs font-medium text-foreground">
+                  <span className="text-sm font-medium text-foreground">
                     {c.author.display_name}
                     <span className="ml-2 font-normal text-muted-foreground">
                       {formatDateTime(c.created_at)}

@@ -99,7 +99,7 @@ function PostComments({
               </Avatar>
               <div className="flex flex-1 flex-col gap-0.5">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs font-medium text-foreground">
+                  <span className="text-sm font-medium text-foreground">
                     {c.users?.display_name ?? "알 수 없음"}
                     <span className="ml-2 font-normal text-muted-foreground">
                       {formatDateTime(c.created_at)}

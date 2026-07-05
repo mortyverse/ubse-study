@@ -275,11 +275,6 @@ function WeeklyPlanPanel({
         </Table>
       </div>
 
-      {isAdmin && (
-        <p className="text-sm text-muted-foreground">
-          강의 블록을 다른 주차 행으로 끌어다 놓으면 진도가 재배정됩니다.
-        </p>
-      )}
     </div>
   )
 }
