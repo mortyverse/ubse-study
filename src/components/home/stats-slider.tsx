@@ -93,7 +93,7 @@ function TrendChart({
             <ChartTooltipContent
               formatter={
                 percent
-                  ? (value, name, item) => [
+                  ? (value, name) => [
                       `${Math.round(Number(value) * 100)}% `,
                       config[name as string]?.label ?? name,
                     ]

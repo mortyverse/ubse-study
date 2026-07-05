@@ -1,5 +1,4 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { NextResponse } from "next/server";
 import type { AppUser } from "@/lib/types";
 import { createSupabaseMock } from "../../helpers/supabase-mock";
 

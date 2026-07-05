@@ -33,9 +33,10 @@ type QuestionDraft = {
   max_score: string
 }
 
-function newQuestion(): QuestionDraft {
-  return { key: crypto.randomUUID(), question_text: "", max_score: "10" }
-}
+// SSR과 클라이언트 hydration이 같은 key를 만들도록 초기 문항은 상수 key를 쓴다
+// (crypto.randomUUID()는 서버/클라이언트 값이 달라 hydration mismatch를 냈다).
+// 추가 문항 key는 ref 카운터에서 발급 — 사용자 액션(클라이언트)에서만 실행된다.
+const INITIAL_QUESTION: QuestionDraft = { key: "q-0", question_text: "", max_score: "10" }
 
 /**
  * 시험 생성 폼 (admin 전용). POST /api/exams → 성공 시 토스트 + /exams 리다이렉트.
@@ -46,8 +47,15 @@ function ExamForm() {
   const [title, setTitle] = React.useState("")
   const [week, setWeek] = React.useState("1")
   const [timeLimit, setTimeLimit] = React.useState("30")
-  const [questions, setQuestions] = React.useState<QuestionDraft[]>([newQuestion()])
+  const [questions, setQuestions] = React.useState<QuestionDraft[]>([INITIAL_QUESTION])
   const [isPending, setIsPending] = React.useState(false)
+  const nextQuestionKey = React.useRef(1)
+
+  const addQuestion = () =>
+    setQuestions((prev) => [
+      ...prev,
+      { key: `q-${nextQuestionKey.current++}`, question_text: "", max_score: "10" },
+    ])
 
   const updateQuestion = (key: string, patch: Partial<QuestionDraft>) => {
     setQuestions((prev) =>
@@ -195,7 +203,7 @@ function ExamForm() {
           <Button
             type="button"
             variant="outline"
-            onClick={() => setQuestions((prev) => [...prev, newQuestion()])}
+            onClick={addQuestion}
             disabled={questions.length >= 50}
             className="self-start"
           >

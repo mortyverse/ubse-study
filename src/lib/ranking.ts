@@ -2,7 +2,7 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { AttendanceStatus, RankingEntry, ScoringSettings } from "@/lib/types";
 
-export const DEFAULT_SCORING: ScoringSettings = { attendance_weight: 100 };
+const DEFAULT_SCORING: ScoringSettings = { attendance_weight: 100 };
 
 interface MemberInput {
   user_id: string;

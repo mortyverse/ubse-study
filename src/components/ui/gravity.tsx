@@ -7,6 +7,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useId,
   useImperativeHandle,
   useRef,
   useState,
@@ -137,12 +138,12 @@ const MatterBody = ({
   ...props
 }: MatterBodyProps) => {
   const elementRef = useRef<HTMLDivElement>(null)
-  const idRef = useRef(Math.random().toString(36).substring(7))
+  const bodyId = useId()
   const context = useContext(GravityContext)
 
   useEffect(() => {
     if (!elementRef.current || !context) return
-    const id = idRef.current
+    const id = bodyId
     context.registerElement(id, elementRef.current, {
       children,
       matterBodyOptions,
@@ -276,7 +277,7 @@ const Gravity = forwardRef<GravityRef, GravityProps>(
     }, [])
 
     // Keep react elements in sync with the physics world
-    const updateElements = useCallback(() => {
+    const updateElements = useCallback(function update() {
       bodiesMap.current.forEach(({ element, body }) => {
         const { x, y } = body.position
         const rotation = body.angle * (180 / Math.PI)
@@ -286,7 +287,8 @@ const Gravity = forwardRef<GravityRef, GravityProps>(
         }px, ${y - element.offsetHeight / 2}px) rotate(${rotation}deg)`
       })
 
-      frameId.current = requestAnimationFrame(updateElements)
+      // 자기 자신을 다음 프레임에 예약 — 명명 함수라 선언 전 참조 없이 안전하다
+      frameId.current = requestAnimationFrame(update)
     }, [])
 
     const startEngine = useCallback(() => {
