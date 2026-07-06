@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import Link from "next/link"
 import { toast } from "sonner"
 
 import { cn } from "@/lib/utils"
@@ -235,18 +234,7 @@ function WeeklyPlanPanel({
                     </div>
                   </TableCell>
                   <TableCell className="px-3 py-2.5 text-base font-medium text-foreground">
-                    {plan.resource_url ? (
-                      <Link
-                        href={plan.resource_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-primary underline-offset-4 hover:underline"
-                      >
-                        {plan.title}
-                      </Link>
-                    ) : (
-                      plan.title
-                    )}
+                    {plan.title}
                   </TableCell>
                   <TableCell className="px-3 py-2.5">
                     <div className="flex items-center justify-center">
