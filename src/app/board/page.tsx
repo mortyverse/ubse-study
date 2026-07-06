@@ -21,6 +21,7 @@ type RawPost = {
   created_at: string
   users: { display_name: string; avatar_url: string | null } | null
   board_comments: { count: number }[] | null
+  post_likes: { count: number }[] | null
 }
 
 function toListPost(row: RawPost): BoardListPost {
@@ -35,6 +36,7 @@ function toListPost(row: RawPost): BoardListPost {
     users: row.users,
     comment_count: row.board_comments?.[0]?.count ?? 0,
     image_count: row.image_paths?.length ?? 0,
+    like_count: row.post_likes?.[0]?.count ?? 0,
   }
 }
 
@@ -54,7 +56,7 @@ export default async function BoardPage({
 
   const supabase = await createClient()
   const selectWithMeta =
-    "*, users:author_id(display_name, avatar_url), board_comments(count)"
+    "*, users:author_id(display_name, avatar_url), board_comments(count), post_likes(count)"
 
   const [{ data: freeRows }, { data: materialRows }, { data: noteRows }] =
     await Promise.all([

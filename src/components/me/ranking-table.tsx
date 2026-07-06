@@ -37,6 +37,7 @@ function RankingTable({
             <TableHead>이름</TableHead>
             <TableHead className="text-center">시험 총점</TableHead>
             <TableHead className="text-center">출석률</TableHead>
+            <TableHead className="text-center">좋아요</TableHead>
             <TableHead className="text-center">총점</TableHead>
           </TableRow>
         </TableHeader>
@@ -95,6 +96,9 @@ function RankingTable({
               </TableCell>
               <TableCell className="text-center text-muted-foreground">
                 {formatPercent(entry.attendance_rate)}
+              </TableCell>
+              <TableCell className="text-center text-muted-foreground">
+                {entry.like_total}
               </TableCell>
               <TableCell className="text-center font-medium text-foreground">
                 {formatScore(entry.total_score)}

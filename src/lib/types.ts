@@ -192,7 +192,7 @@ export interface ScoringSettings {
 /**
  * 랭킹 산식 (PRD §4.4 + 소유자 결정):
  * 출석률 = (출석 + 지각×0.5) / 종료된 세션 수 (0–1)
- * 총점 = Σ(admin 확정 final_score) + 출석률 × attendance_weight
+ * 총점 = Σ(admin 확정 final_score) + 출석률 × attendance_weight + 필기노트 좋아요 수 × 1
  * AI 1차 점수(ai_score)는 절대 반영하지 않는다.
  */
 export interface RankingEntry {
@@ -203,6 +203,8 @@ export interface RankingEntry {
   project_url: string | null;
   exam_total: number;
   attendance_rate: number;
+  /** 필기노트로 받은 좋아요 수 — 1개 = 총점 +1점 */
+  like_total: number;
   total_score: number;
   rank: number;
 }

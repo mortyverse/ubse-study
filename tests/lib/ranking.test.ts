@@ -38,6 +38,7 @@ describe("computeRanking", () => {
       project_url: null,
       final_scores: [],
       attendance: [],
+      like_total: 0,
       ...overrides,
     };
   }
@@ -132,6 +133,42 @@ describe("computeRanking", () => {
       settings,
     );
     expect(entries.map((e) => e.rank)).toEqual([1, 1, 1, 4]);
+  });
+
+  it("adds note likes received at exactly +1 point each to total_score", () => {
+    const [entry] = computeRanking(
+      [
+        member({
+          user_id: "a",
+          final_scores: [50],
+          attendance: ["present"],
+          like_total: 3,
+        }),
+      ],
+      1,
+      { attendance_weight: 20 },
+    );
+    // 50 + 1.0*20 + 3 = 73
+    expect(entry.like_total).toBe(3);
+    expect(entry.total_score).toBe(73);
+  });
+
+  it("likes can change the ranking order (tie broken by +1 per like)", () => {
+    const entries = computeRanking(
+      [
+        member({ user_id: "no-likes", display_name: "가", final_scores: [50] }),
+        member({
+          user_id: "liked",
+          display_name: "나",
+          final_scores: [50],
+          like_total: 2,
+        }),
+      ],
+      0,
+      settings,
+    );
+    expect(entries.map((e) => e.user_id)).toEqual(["liked", "no-likes"]);
+    expect(entries.map((e) => e.rank)).toEqual([1, 2]);
   });
 
   it("gives a member with no exams and no attendance a total_score of 0, ranked last", () => {

@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { CameraIcon, ChatBubbleIcon } from "@radix-ui/react-icons"
+import { CameraIcon, ChatBubbleIcon, HeartFilledIcon } from "@radix-ui/react-icons"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -100,6 +100,12 @@ function PostList({
               <span className="flex shrink-0 items-center gap-1 text-sm text-muted-foreground">
                 <CameraIcon />
                 {post.image_count}
+              </span>
+            )}
+            {category === "note" && post.like_count > 0 && (
+              <span className="flex shrink-0 items-center gap-1 text-sm text-muted-foreground">
+                <HeartFilledIcon className="text-destructive/70" />
+                {post.like_count}
               </span>
             )}
             {category === "free" && post.comment_count > 0 && (

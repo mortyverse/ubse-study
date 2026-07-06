@@ -20,6 +20,8 @@ export interface BoardListPost {
   comment_count: number
   /** 필기노트 공책 사진 장수 (다른 카테고리는 항상 0) */
   image_count: number
+  /** 필기노트 좋아요 수 (다른 카테고리는 항상 0) */
+  like_count: number
 }
 
 export interface BoardCommentView {

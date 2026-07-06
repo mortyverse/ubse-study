@@ -12,6 +12,7 @@ import { CategoryBadge } from "@/components/board/category-badge"
 import { MarkdownContent } from "@/components/board/markdown-content"
 import { PostActions } from "@/components/board/post-actions"
 import { PostComments } from "@/components/board/post-comments"
+import { PostLikeButton } from "@/components/board/post-like-button"
 import { AttachmentDownloadButton } from "@/components/board/attachment-download-button"
 import type { BoardCommentView } from "@/components/board/types"
 import type { AppUser, BoardPost } from "@/lib/types"
@@ -67,6 +68,26 @@ export default async function BoardPostDetailPage({
     noteImageUrls = (signed ?? []).flatMap((s) => (s.signedUrl ? [s.signedUrl] : []))
   }
 
+  // 필기노트 좋아요: 총 개수 + 본인이 눌렀는지 (RLS: 승인 멤버 SELECT 허용)
+  let likeCount = 0
+  let viewerLiked = false
+  if (typedPost.category === "note") {
+    const [{ count }, { data: myLike }] = await Promise.all([
+      supabase
+        .from("post_likes")
+        .select("*", { count: "exact", head: true })
+        .eq("post_id", id),
+      supabase
+        .from("post_likes")
+        .select("post_id")
+        .eq("post_id", id)
+        .eq("user_id", profile.id)
+        .maybeSingle(),
+    ])
+    likeCount = count ?? 0
+    viewerLiked = Boolean(myLike)
+  }
+
   const { data: comments } = await supabase
     .from("board_comments")
     .select("id, post_id, author_id, content, created_at, users:author_id(display_name, avatar_url)")
@@ -104,9 +125,19 @@ export default async function BoardPostDetailPage({
                 <span>{formatDateTime(typedPost.created_at)}</span>
               </div>
             </div>
-            {canModify(typedPost, profile) && (
-              <PostActions postId={typedPost.id} category={typedPost.category} />
-            )}
+            <div className="flex items-center gap-3">
+              {typedPost.category === "note" && (
+                <PostLikeButton
+                  postId={typedPost.id}
+                  initialCount={likeCount}
+                  initialLiked={viewerLiked}
+                  isAuthor={typedPost.author_id === profile.id}
+                />
+              )}
+              {canModify(typedPost, profile) && (
+                <PostActions postId={typedPost.id} category={typedPost.category} />
+              )}
+            </div>
           </div>
 
           {typedPost.link_url && (

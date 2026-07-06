@@ -14,6 +14,8 @@ interface MemberInput {
   final_scores: number[];
   /** 종료된 세션들의 본인 출석 상태 */
   attendance: AttendanceStatus[];
+  /** 필기노트로 받은 좋아요 수 (1개 = +1점) */
+  like_total: number;
 }
 
 /** 출석률 = (출석 + 지각×0.5) / 종료 세션 수. 세션 0개면 0. (소유자 결정: 지각=0.5) */
@@ -30,7 +32,8 @@ export function attendanceRateOf(
 }
 
 /**
- * 총점 = Σ(admin 확정 final_score) + 출석률(0–1) × attendance_weight (PRD §4.4).
+ * 총점 = Σ(admin 확정 final_score) + 출석률(0–1) × attendance_weight
+ *        + 필기노트 좋아요 수 × 1점 (PRD §4.4 + 좋아요 확장).
  * 랭킹은 총점 내림차순, 동점은 공동 순위(competition ranking: 1,1,3).
  * 순수 함수 — 서버 로직 테스트 대상.
  */
@@ -50,7 +53,8 @@ export function computeRanking(
       project_url: m.project_url,
       exam_total: examTotal,
       attendance_rate: rate,
-      total_score: examTotal + rate * settings.attendance_weight,
+      like_total: m.like_total,
+      total_score: examTotal + rate * settings.attendance_weight + m.like_total,
       rank: 0,
     };
   });
@@ -97,7 +101,7 @@ export async function buildRanking(): Promise<{
   const admin = createAdminClient();
   const nowIso = new Date().toISOString();
 
-  const [settings, usersRes, sessionsRes, recordsRes, answersRes] =
+  const [settings, usersRes, sessionsRes, recordsRes, answersRes, likesRes] =
     await Promise.all([
       getScoringSettings(),
       admin
@@ -115,9 +119,21 @@ export async function buildRanking(): Promise<{
         .from("exam_answers")
         .select("final_score, exam_submissions!inner(user_id)")
         .not("final_score", "is", null),
+      // 필기노트로 받은 좋아요 — 글 작성자 기준으로 집계 (API가 note 외 삽입을 막지만 이중 방어로 필터)
+      admin
+        .from("post_likes")
+        .select("board_posts!inner(author_id, category)")
+        .eq("board_posts.category", "note"),
     ]);
 
   const finishedSessionIds = new Set((sessionsRes.data ?? []).map((s) => s.id));
+
+  const likesByAuthor = new Map<string, number>();
+  for (const like of likesRes.data ?? []) {
+    const authorId = (like.board_posts as unknown as { author_id: string })
+      .author_id;
+    likesByAuthor.set(authorId, (likesByAuthor.get(authorId) ?? 0) + 1);
+  }
 
   const members: MemberInput[] = (usersRes.data ?? []).map((u) => ({
     user_id: u.id,
@@ -137,6 +153,7 @@ export async function buildRanking(): Promise<{
         (r) => r.user_id === u.id && finishedSessionIds.has(r.session_id),
       )
       .map((r) => r.status as AttendanceStatus),
+    like_total: likesByAuthor.get(u.id) ?? 0,
   }));
 
   return {
