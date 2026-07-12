@@ -2,6 +2,7 @@
 
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 
+import { renderAverageSquareDot } from "@/components/common/chart-square-dot"
 import {
   ChartContainer,
   ChartTooltip,
@@ -15,10 +16,10 @@ export type ScoreTrendPoint = {
   average: number
 }
 
-// 본인 데이터 = violet(--chart-1), 전체 평균 = slate(--chart-4) — CLAUDE.md 차트 규칙.
+// 본인 데이터 = violet(--chart-1), 전체 평균 = pastel rose 실선 + 사각 마커(--chart-average).
 const chartConfig = {
   mine: { label: "내 점수", color: "var(--chart-1)" },
-  average: { label: "전체 평균", color: "var(--chart-4)" },
+  average: { label: "전체 평균", color: "var(--chart-average)" },
 } satisfies ChartConfig
 
 function ScoreChart({ data }: { data: ScoreTrendPoint[] }) {
@@ -47,8 +48,9 @@ function ScoreChart({ data }: { data: ScoreTrendPoint[] }) {
           dataKey="average"
           stroke="var(--color-average)"
           strokeWidth={2}
-          strokeDasharray="4 4"
-          dot={{ r: 3 }}
+          strokeOpacity={0.75}
+          dot={renderAverageSquareDot(6)}
+          activeDot={renderAverageSquareDot(8)}
         />
       </LineChart>
     </ChartContainer>

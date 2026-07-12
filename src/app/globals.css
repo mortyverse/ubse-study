@@ -18,6 +18,7 @@
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
+  --color-chart-average: var(--chart-average);
   --color-chart-6: var(--chart-6);
   --color-chart-5: var(--chart-5);
   --color-chart-4: var(--chart-4);
@@ -91,9 +92,10 @@
   --chart-1: #7365a6; /* violet (본인 데이터) */
   --chart-2: #f5b0f0; /* pink spark — 장식/하이라이트 전용, 텍스트 금지 */
   --chart-3: #bf8d7a; /* terracotta ★ */
-  --chart-4: #6d6f8c; /* slate ★ (전체 평균) */
+  --chart-4: #6d6f8c; /* slate ★ */
   --chart-5: #4e9e81; /* sage green */
   --chart-6: #d9a441; /* amber */
+  --chart-average: #e29aa5; /* pastel rose — 전체 평균 전용(실선 + 사각 마커) */
   /* 섹션 컬러 밴드 — 컬러 밴드 2개 연속 배치 금지 */
   --band-peach: #f2ccb6; /* peach ★ (히어로/푸터 앵커) */
   --band-peach-light: #f7dfcb;
@@ -146,6 +148,7 @@
   --chart-4: #8b8daa;
   --chart-5: #63b394;
   --chart-6: #e0b055;
+  --chart-average: #e8a6b0; /* pastel rose (전체 평균) — 다크에서 살짝 승격 */
   --band-peach: #3a3145;
   --band-peach-light: #342c3e;
   --band-lavender: #2d2a40;

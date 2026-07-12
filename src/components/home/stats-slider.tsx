@@ -5,6 +5,7 @@ import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts"
 import { ChevronLeftIcon, ChevronRightIcon } from "@radix-ui/react-icons"
 
 import { cn } from "@/lib/utils"
+import { renderAverageSquareDot } from "@/components/common/chart-square-dot"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/common/empty-state"
 import {
@@ -24,7 +25,7 @@ export type GroupChartRow = {
 
 type Member = { id: string; name: string }
 
-/** 본인 = violet 실선(강조), 전체 평균 = slate 점선, 나머지 멤버는 보조 팔레트 순환 */
+/** 본인 = violet 실선(강조), 전체 평균 = pastel rose 실선 + 사각 마커, 나머지 멤버는 보조 팔레트 순환 */
 const OTHER_COLORS = [
   "var(--chart-3)",
   "var(--chart-5)",
@@ -34,7 +35,7 @@ const OTHER_COLORS = [
 
 function buildConfig(members: Member[], viewerId: string): ChartConfig {
   const config: ChartConfig = {
-    average: { label: "전체 평균", color: "var(--chart-4)" },
+    average: { label: "전체 평균", color: "var(--chart-average)" },
   }
   let otherIndex = 0
   for (const m of members) {
@@ -125,8 +126,9 @@ function TrendChart({
           dataKey="average"
           stroke="var(--color-average)"
           strokeWidth={2}
-          strokeDasharray="4 4"
-          dot={{ r: 3 }}
+          strokeOpacity={0.75}
+          dot={renderAverageSquareDot(6)}
+          activeDot={renderAverageSquareDot(8)}
           connectNulls={false}
           animationBegin={0}
           animationDuration={700}
