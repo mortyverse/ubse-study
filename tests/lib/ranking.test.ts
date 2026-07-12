@@ -4,25 +4,29 @@ import type { ScoringSettings } from "@/lib/types";
 
 describe("attendanceRateOf", () => {
   it("counts present as full credit (1)", () => {
-    expect(attendanceRateOf(["present"], 1)).toBe(1);
+    expect(attendanceRateOf(["present"])).toBe(1);
   });
 
   it("counts late as half credit (0.5)", () => {
-    expect(attendanceRateOf(["late"], 1)).toBe(0.5);
+    expect(attendanceRateOf(["late"])).toBe(0.5);
   });
 
   it("counts absent as zero credit", () => {
-    expect(attendanceRateOf(["absent"], 1)).toBe(0);
+    expect(attendanceRateOf(["absent"])).toBe(0);
   });
 
-  it("returns 0 when there are 0 finished sessions (no division by zero)", () => {
-    expect(attendanceRateOf([], 0)).toBe(0);
-    expect(attendanceRateOf(["present"], 0)).toBe(0);
+  it("returns 0 for a member with no records yet (no division by zero)", () => {
+    expect(attendanceRateOf([])).toBe(0);
   });
 
-  it("averages a mix of statuses over the total session count", () => {
+  it("averages a mix of statuses over the member's own record count", () => {
     // present + late + absent + present = (1 + 0.5 + 0 + 1) / 4 = 0.625
-    expect(attendanceRateOf(["present", "late", "absent", "present"], 4)).toBeCloseTo(0.625);
+    expect(attendanceRateOf(["present", "late", "absent", "present"])).toBeCloseTo(0.625);
+  });
+
+  it("late joiner: denominator is own records, not global session count — joined week 2, attended it → 100% not 50%", () => {
+    // 시스템 전체 종료 세션은 2개지만, 이 멤버는 2주차에 합류해 레코드가 1개뿐.
+    expect(attendanceRateOf(["present"])).toBe(1);
   });
 });
 
@@ -46,7 +50,6 @@ describe("computeRanking", () => {
   it("exam_total is the sum of ONLY the provided final_scores (AI scores are never part of the input by design)", () => {
     const [entry] = computeRanking(
       [member({ user_id: "a", final_scores: [10, 20, 30], attendance: [] })],
-      0,
       settings,
     );
     // computeRanking's MemberInput type has no ai_score field at all — the
@@ -65,7 +68,6 @@ describe("computeRanking", () => {
           attendance: ["present", "present"],
         }),
       ],
-      2,
       { attendance_weight: 20 },
     );
     // rate = 1.0, total = 50 + 1.0*20 = 70
@@ -75,8 +77,8 @@ describe("computeRanking", () => {
 
   it("applies the weight from settings (not a hardcoded value)", () => {
     const members = [member({ user_id: "a", final_scores: [0], attendance: ["present"] })];
-    const low = computeRanking(members, 1, { attendance_weight: 10 })[0];
-    const high = computeRanking(members, 1, { attendance_weight: 200 })[0];
+    const low = computeRanking(members, { attendance_weight: 10 })[0];
+    const high = computeRanking(members, { attendance_weight: 200 })[0];
     expect(low.total_score).toBe(10);
     expect(high.total_score).toBe(200);
   });
@@ -88,7 +90,6 @@ describe("computeRanking", () => {
         member({ user_id: "high", display_name: "나", final_scores: [90] }),
         member({ user_id: "mid", display_name: "다", final_scores: [50] }),
       ],
-      0,
       settings,
     );
     expect(entries.map((e) => e.user_id)).toEqual(["high", "mid", "low"]);
@@ -101,7 +102,6 @@ describe("computeRanking", () => {
         member({ user_id: "y", display_name: "가은", final_scores: [50] }),
         member({ user_id: "x", display_name: "나연", final_scores: [50] }),
       ],
-      0,
       settings,
     );
     expect(entries.map((e) => e.display_name)).toEqual(["가은", "나연", "다현"]);
@@ -115,7 +115,6 @@ describe("computeRanking", () => {
         member({ user_id: "c", display_name: "다", final_scores: [50] }),
         member({ user_id: "d", display_name: "라", final_scores: [10] }),
       ],
-      0,
       settings,
     );
     expect(entries.map((e) => e.rank)).toEqual([1, 1, 3, 4]);
@@ -129,7 +128,6 @@ describe("computeRanking", () => {
         member({ user_id: "c", display_name: "다", final_scores: [10] }),
         member({ user_id: "d", display_name: "라", final_scores: [1] }),
       ],
-      0,
       settings,
     );
     expect(entries.map((e) => e.rank)).toEqual([1, 1, 1, 4]);
@@ -145,7 +143,6 @@ describe("computeRanking", () => {
           like_total: 3,
         }),
       ],
-      1,
       { attendance_weight: 20 },
     );
     // 50 + 1.0*20 + 3 = 73
@@ -164,11 +161,26 @@ describe("computeRanking", () => {
           like_total: 2,
         }),
       ],
-      0,
       settings,
     );
     expect(entries.map((e) => e.user_id)).toEqual(["liked", "no-likes"]);
     expect(entries.map((e) => e.rank)).toEqual([1, 2]);
+  });
+
+  it("late joiner is not penalized: week-2 joiner with 1/1 present ties a veteran with 2/2 present", () => {
+    // 기존 멤버: 1·2주차 모두 출석(레코드 2개), 신규 멤버: 2주차 합류 후 출석(레코드 1개)
+    const entries = computeRanking(
+      [
+        member({ user_id: "veteran", display_name: "가", attendance: ["present", "present"] }),
+        member({ user_id: "newbie", display_name: "나", attendance: ["present"] }),
+      ],
+      settings,
+    );
+    const newbie = entries.find((e) => e.user_id === "newbie")!;
+    const veteran = entries.find((e) => e.user_id === "veteran")!;
+    expect(newbie.attendance_rate).toBe(1);
+    expect(newbie.total_score).toBe(veteran.total_score);
+    expect(entries.map((e) => e.rank)).toEqual([1, 1]);
   });
 
   it("gives a member with no exams and no attendance a total_score of 0, ranked last", () => {
@@ -177,7 +189,6 @@ describe("computeRanking", () => {
         member({ user_id: "a", display_name: "가", final_scores: [10] }),
         member({ user_id: "b", display_name: "나", final_scores: [] }),
       ],
-      0,
       settings,
     );
     const zero = entries.find((e) => e.user_id === "b")!;

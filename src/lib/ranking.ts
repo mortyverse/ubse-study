@@ -18,17 +18,19 @@ interface MemberInput {
   like_total: number;
 }
 
-/** 출석률 = (출석 + 지각×0.5) / 종료 세션 수. 세션 0개면 0. (소유자 결정: 지각=0.5) */
-export function attendanceRateOf(
-  statuses: AttendanceStatus[],
-  totalSessions: number,
-): number {
-  if (totalSessions <= 0) return 0;
+/**
+ * 출석률 = (출석 + 지각×0.5) / 본인 출석 레코드 수. 레코드 0개면 0.
+ * 분모가 전역 세션 수가 아니라 본인 레코드 수인 이유: 레코드는 세션 시작 시점의
+ * 승인 멤버에게만 생성되므로, 중간 합류 멤버가 합류 전 세션만큼 깎이지 않게 한다.
+ * (소유자 결정: 지각=0.5, 합류 시점부터 계산)
+ */
+export function attendanceRateOf(statuses: AttendanceStatus[]): number {
+  if (statuses.length === 0) return 0;
   const credit = statuses.reduce(
     (sum, s) => sum + (s === "present" ? 1 : s === "late" ? 0.5 : 0),
     0,
   );
-  return credit / totalSessions;
+  return credit / statuses.length;
 }
 
 /**
@@ -39,12 +41,11 @@ export function attendanceRateOf(
  */
 export function computeRanking(
   members: MemberInput[],
-  totalSessions: number,
   settings: ScoringSettings,
 ): RankingEntry[] {
   const entries = members.map((m) => {
     const examTotal = m.final_scores.reduce((a, b) => a + b, 0);
-    const rate = attendanceRateOf(m.attendance, totalSessions);
+    const rate = attendanceRateOf(m.attendance);
     return {
       user_id: m.user_id,
       display_name: m.display_name,
@@ -90,8 +91,9 @@ export async function getScoringSettings(): Promise<ScoringSettings> {
 
 /**
  * 실명 전체 공개 랭킹 (PRD §4.4 — 익명화 없음).
- * 종료된 세션(closes_at <= now)만 출석률 분모에 넣는다 — 진행 중 세션이
- * 전원의 출석률을 일시적으로 깎는 것을 방지.
+ * 출석률 분모는 "종료된 세션(closes_at <= now) 중 본인 레코드가 있는 것"만 —
+ * 진행 중 세션이 전원의 출석률을 일시적으로 깎는 것과, 중간 합류 멤버가
+ * 합류 전 세션만큼 깎이는 것을 모두 방지.
  */
 export async function buildRanking(): Promise<{
   entries: RankingEntry[];
@@ -157,7 +159,7 @@ export async function buildRanking(): Promise<{
   }));
 
   return {
-    entries: computeRanking(members, finishedSessionIds.size, settings),
+    entries: computeRanking(members, settings),
     totalSessions: finishedSessionIds.size,
     settings,
   };

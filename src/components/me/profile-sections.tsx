@@ -114,8 +114,8 @@ async function ProfileSections({
           <CardHeader>
             <CardTitle>점수 추이</CardTitle>
             <CardDescription>
-              시험별 확정 총점 — {isOwner ? "내" : `${targetName}님의`} 점수(실선)와 전체
-              평균(점선)
+              시험별 확정 총점 — {isOwner ? "내" : `${targetName}님의`} 점수(보라)와 전체
+              평균(로즈)
             </CardDescription>
           </CardHeader>
           <CardContent>
