@@ -3,6 +3,11 @@ import remarkGfm from "remark-gfm"
 
 import { cn } from "@/lib/utils"
 
+/** 절대 URL(http/https 등)만 외부 링크로 취급 — 상대 경로/앵커는 내부 이동. */
+function isExternalUrl(href: string | undefined): boolean {
+  return !!href && /^[a-z][a-z0-9+.-]*:/i.test(href)
+}
+
 /**
  * 마크다운 렌더 영역 (게시글 상세 / 미리보기 공통).
  * @tailwindcss/typography는 추가하지 않고, 넉넉한 여백의 커스텀 스타일만 적용한다.
@@ -36,7 +41,23 @@ function MarkdownContent({
         className,
       )}
     >
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          a: ({ href, children, ...props }) =>
+            isExternalUrl(href) ? (
+              <a href={href} target="_blank" rel="noreferrer" {...props}>
+                {children}
+              </a>
+            ) : (
+              <a href={href} {...props}>
+                {children}
+              </a>
+            ),
+        }}
+      >
+        {content}
+      </ReactMarkdown>
     </div>
   )
 }
